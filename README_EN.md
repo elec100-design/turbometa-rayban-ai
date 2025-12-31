@@ -30,6 +30,8 @@
 
 ✅ **iOS v1.4.0** | ✅ **Android v1.4.0**
 
+☕ **Enjoying this project?** [**Buy me a coffee**](https://buymeacoffee.com/turbo1123) to support development!
+
 </div>
 
 > ☕ **Enjoying this project?** This is a passion project maintained in my spare time. If it's been helpful to you, consider [**buying me a coffee**](https://buymeacoffee.com/turbo1123) - it really helps keep the project going!
@@ -121,8 +123,6 @@ Before using TurboMeta, you **MUST** enable developer mode in Meta AI App:
 
 ### 📱 Android
 
-> ⚠️ **Note**: Android version is currently v1.0.0, latest features not yet available
-
 👉 [**Go to Downloads**](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
 
 **Android Installation:**
@@ -136,7 +136,7 @@ Before using TurboMeta, you **MUST** enable developer mode in Meta AI App:
 
 ### 🍎 iOS (Recommended)
 
-> ✅ **Latest Version**: iOS updated to v1.3.0 with bilingual UI, OpenRouter, Gemini support
+> ✅ Supports bilingual UI, OpenRouter, Gemini, RTMP streaming
 
 👉 [**Go to Downloads**](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
 
