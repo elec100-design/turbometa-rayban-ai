@@ -29,7 +29,7 @@
 
 **Museum guide, accessibility assistant, reading mode, real-time translation - one pair of glasses, endless possibilities!**
 
-✅ **iOS v1.5.0** | 📱 **Android v1.4.0** [Download](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
+✅ **iOS v1.5.0** | 📱 **Android v1.5.0** [Download](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
 
 ☕ **Enjoying this project?** [**Buy me a coffee**](https://buymeacoffee.com/turbo1123) or [**removed**](./.png) to support development!
 
