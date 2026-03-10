@@ -134,10 +134,9 @@
 
 1. 克隆本仓库源码
 2. 使用 **Xcode 15.0+** 打开 `CameraAccess.xcodeproj`
-3. 配置你自己的开发者证书和 Bundle Identifier
+3. 在 Xcode 中选择你的 Apple ID 账号和 Bundle Identifier
 4. 连接 iPhone，点击 Run 编译运行
-5. 首次运行需要在 iPhone **设置 → 通用 → VPN与设备管理** 中信任开发者证书
-6. 打开 TurboMeta，在设置中配置你的阿里云 API Key 👉 [查看配置教程](#api-key-config)
+5. 打开 TurboMeta，在设置中配置你的阿里云 API Key 👉 [查看配置教程](#api-key-config)
 
 ### 📱 Android
 

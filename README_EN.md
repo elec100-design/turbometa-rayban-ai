@@ -132,10 +132,9 @@ Before using TurboMeta, you **MUST** enable developer mode in Meta AI App:
 
 1. Clone this repository
 2. Open `CameraAccess.xcodeproj` with **Xcode 15.0+**
-3. Configure your own developer certificate and Bundle Identifier
+3. Select your Apple ID account and Bundle Identifier in Xcode
 4. Connect your iPhone, click Run to build and install
-5. First launch requires trusting the developer certificate in iPhone **Settings → General → VPN & Device Management**
-6. Open TurboMeta and configure your Alibaba Cloud API Key in Settings 👉 [See Configuration Guide](#api-key-config)
+5. Open TurboMeta and configure your Alibaba Cloud API Key in Settings 👉 [See Configuration Guide](#api-key-config)
 
 ### 📱 Android
 
