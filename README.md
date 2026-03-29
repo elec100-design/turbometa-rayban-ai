@@ -41,14 +41,14 @@
 
 ### 🆕 v2.0 新功能
 
-- 🔗 **OpenClaw 集成**：将眼镜连接到 [OpenClaw](https://openclaw.ai) AI 助手，支持拍照发送、语音转录对话
+- 🔗 **OpenClaw 集成**：将眼镜连接到 [OpenClaw](https://openclaw.ai) AI 助手，支持拍照发送、语音转录对话 👉 [使用教程](#-openclaw-集成)
 - 🕶️ **Meta Ray-Ban Display 支持**：新增对 Meta Ray-Ban Display 机型的支持（DAT SDK v0.5.0）
 - 🎙️ **阿里云实时语音识别**：OpenClaw 聊天支持 Fun-ASR 语音转文字
 - 🛡️ **稳定性提升**：修复多个内存泄漏和线程安全问题
 
 ### 🎯 核心功能
 
-- 🔗 **OpenClaw AI 助手**：连接 OpenClaw Gateway，通过眼镜拍照与 AI 对话
+- 🔗 **OpenClaw AI 助手**：连接 OpenClaw Gateway，通过眼镜拍照与 AI 对话 👉 [查看配置教程](#-openclaw-集成)
 - 🎬 **RTMP 直播推流**：支持推流到任意 RTMP 平台，YouTube、Twitch、B站、抖音、TikTok、Facebook Live 等
 - 👁️ **Quick Vision 快速识图**：Siri 语音唤醒，无需解锁手机即可识别眼前物体
 - 🤖 **Live AI 实时对话**：通过眼镜摄像头和麦克风进行多模态实时 AI 对话

@@ -39,14 +39,14 @@
 
 ### 🆕 v2.0 New Features
 
-- 🔗 **OpenClaw Integration**: Connect your glasses to [OpenClaw](https://openclaw.ai) AI assistant — snap photos & voice chat
+- 🔗 **OpenClaw Integration**: Connect your glasses to [OpenClaw](https://openclaw.ai) AI assistant — snap photos & voice chat 👉 [Setup Guide](#-openclaw-integration)
 - 🕶️ **Meta Ray-Ban Display Support**: Added support for Meta Ray-Ban Display glasses (DAT SDK v0.5.0)
 - 🎙️ **Real-time Speech Recognition**: OpenClaw chat supports Alibaba Fun-ASR voice-to-text
 - 🛡️ **Stability Improvements**: Fixed memory leaks and thread safety issues
 
 ### 🎯 Core Features
 
-- 🔗 **OpenClaw AI Assistant**: Connect to OpenClaw Gateway, chat with AI using glasses photos
+- 🔗 **OpenClaw AI Assistant**: Connect to OpenClaw Gateway, chat with AI using glasses photos 👉 [Setup Guide](#-openclaw-integration)
 - 🎬 **RTMP Live Streaming**: Stream to any RTMP platform — YouTube, Twitch, Bilibili, Douyin, TikTok, Facebook Live, etc.
 - 👁️ **Quick Vision**: Siri voice activation - identify objects without unlocking your phone
 - 🤖 **Live AI**: Real-time multimodal AI conversation via glasses camera and microphone
