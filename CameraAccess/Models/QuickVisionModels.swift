@@ -16,9 +16,9 @@ enum QuickVisionMode: String, CaseIterable, Codable, Identifiable {
     case translate = "translate"    // 翻译模式
     case encyclopedia = "encyclopedia" // 百科（博物馆）模式
     case custom = "custom"          // 自定义提示词
-
+    
     var id: String { rawValue }
-
+    
     var displayName: String {
         switch self {
         case .standard:
@@ -37,7 +37,7 @@ enum QuickVisionMode: String, CaseIterable, Codable, Identifiable {
             return "quickvision.mode.custom".localized
         }
     }
-
+    
     var icon: String {
         switch self {
         case .standard:
@@ -56,7 +56,7 @@ enum QuickVisionMode: String, CaseIterable, Codable, Identifiable {
             return "pencil.circle"
         }
     }
-
+    
     var description: String {
         switch self {
         case .standard:
@@ -75,26 +75,24 @@ enum QuickVisionMode: String, CaseIterable, Codable, Identifiable {
             return "quickvision.mode.custom.desc".localized
         }
     }
-
+    
     /// 获取模式对应的提示词
     var prompt: String {
         switch self {
         case .standard:
-            return "prompt.quickvision".localized
+            return "이 사진을 자세히 설명해줘. 반드시 한국어로 답변해줘."
         case .health:
-            return "prompt.quickvision.health".localized
+            return "이 사진 속 음식이나 물건의 건강 및 영양 정보를 한국어로 자세히 알려줘."
         case .blind:
-            return "prompt.quickvision.blind".localized
+            return "시각 장애인을 위해 내 눈앞의 상황을 아주 상세하게 한국어로 묘사해줘."
         case .reading:
-            return "prompt.quickvision.reading".localized
+            return "사진 속에 보이는 글자들을 모두 읽고, 그 내용을 한국어로 요약해서 설명해줘."
         case .translate:
-            // 翻译模式需要从 Manager 获取目标语言
-            return "prompt.quickvision.translate".localized
+            return "사진 속에 보이는 외국어를 모두 한국어로 번역해서 알려줘."
         case .encyclopedia:
-            return "prompt.quickvision.encyclopedia".localized
+            return "사진 속의 사물, 예술품, 혹은 장소에 대해 백과사전처럼 자세한 정보를 한국어로 설명해줘."
         case .custom:
-            // 自定义模式需要从 Manager 获取
-            return ""
+            return "" // 사용자 정의 모드는 그대로 둡니다.
         }
     }
 }

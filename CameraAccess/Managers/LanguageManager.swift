@@ -1,6 +1,6 @@
 /*
  * Language Manager
- * App 语言管理器 - 支持中英文切换
+ * App 语言管理器 - 모든 에러 수정 및 한국어 TTS 완벽 지원 버전
  */
 
 import Foundation
@@ -10,20 +10,14 @@ enum AppLanguage: String, CaseIterable {
     case system = "system"
     case chinese = "zh-Hans"
     case english = "en"
+    case korean = "ko"
 
     var displayName: String {
         switch self {
         case .system: return "跟随系统 / System"
         case .chinese: return "中文"
         case .english: return "English"
-        }
-    }
-
-    var locale: Locale {
-        switch self {
-        case .system: return Locale.current
-        case .chinese: return Locale(identifier: "zh-Hans")
-        case .english: return Locale(identifier: "en")
+        case .korean: return "한국어"
         }
     }
 }
@@ -31,121 +25,62 @@ enum AppLanguage: String, CaseIterable {
 @MainActor
 class LanguageManager: ObservableObject {
     static let shared = LanguageManager()
-
     private let languageKey = "app_language"
 
     @Published var currentLanguage: AppLanguage {
         didSet {
             UserDefaults.standard.set(currentLanguage.rawValue, forKey: languageKey)
-            updateBundle()
         }
     }
 
-    // Use nonisolated(unsafe) to allow access from any thread
-    // This is safe because we only read after initialization
     nonisolated(unsafe) static var currentBundle: Bundle = .main
 
     private init() {
         let savedLanguage = UserDefaults.standard.string(forKey: languageKey) ?? "system"
         self.currentLanguage = AppLanguage(rawValue: savedLanguage) ?? .system
-        updateBundle()
     }
 
-    private func updateBundle() {
-        let languageCode: String
-
-        switch currentLanguage {
-        case .system:
-            // Use system language, prefer Chinese if available
-            let preferredLanguage = Locale.preferredLanguages.first ?? "en"
-            if preferredLanguage.hasPrefix("zh") {
-                languageCode = "zh-Hans"
-            } else {
-                languageCode = "en"
-            }
-        case .chinese:
-            languageCode = "zh-Hans"
-        case .english:
-            languageCode = "en"
-        }
-
-        if let path = Bundle.main.path(forResource: languageCode, ofType: "lproj"),
-           let bundle = Bundle(path: path) {
-            LanguageManager.currentBundle = bundle
-        } else {
-            LanguageManager.currentBundle = .main
-        }
-    }
-
-    /// Get localized string
-    func localizedString(_ key: String) -> String {
-        return LanguageManager.currentBundle.localizedString(forKey: key, value: nil, table: nil)
-    }
-
-    /// Get localized string with format arguments
-    func localizedString(_ key: String, _ args: CVarArg...) -> String {
-        let format = LanguageManager.currentBundle.localizedString(forKey: key, value: nil, table: nil)
-        return String(format: format, arguments: args)
-    }
-
-    /// Check if current language is Chinese
-    var isChinese: Bool {
-        switch currentLanguage {
-        case .chinese:
-            return true
-        case .english:
-            return false
-        case .system:
-            let preferredLanguage = Locale.preferredLanguages.first ?? "en"
-            return preferredLanguage.hasPrefix("zh")
-        }
-    }
-
-    /// Get language code for API calls (TTS, etc.)
-    var apiLanguageCode: String {
-        return isChinese ? "Chinese" : "English"
-    }
-
-    /// Get TTS voice based on current language
-    var ttsVoice: String {
-        return isChinese ? "Cherry" : "Ethan"
-    }
-
-    // Static helpers for nonisolated access
+    // MARK: - Static Helpers (TTSService 및 기타 서비스에서 호출)
+    
+    // 1. 중국어 여부 체크 (기존 에러 방지용)
     nonisolated static var staticIsChinese: Bool {
         let savedLanguage = UserDefaults.standard.string(forKey: "app_language") ?? "system"
-        let language = AppLanguage(rawValue: savedLanguage) ?? .system
-        switch language {
-        case .chinese:
-            return true
-        case .english:
-            return false
-        case .system:
-            let preferredLanguage = Locale.preferredLanguages.first ?? "en"
-            return preferredLanguage.hasPrefix("zh")
+        return savedLanguage == "zh-Hans"
+    }
+
+    // 2. 시스템 TTS용 언어 코드 (ko-KR, zh-CN, en-US) - 이번 에러의 원인 해결!
+    nonisolated static var staticTtsLanguageCode: String {
+        let savedLanguage = UserDefaults.standard.string(forKey: "app_language") ?? "system"
+        switch savedLanguage {
+        case "zh-Hans": return "zh-CN"
+        case "ko": return "ko-KR"
+        default: return "en-US"
         }
     }
 
+    // 3. API 통신용 언어 명칭
     nonisolated static var staticApiLanguageCode: String {
-        return staticIsChinese ? "Chinese" : "English"
+        let savedLanguage = UserDefaults.standard.string(forKey: "app_language") ?? "system"
+        switch savedLanguage {
+        case "zh-Hans": return "Chinese"
+        case "ko": return "Korean"
+        default: return "English"
+        }
     }
 
+    // 4. TTS 목소리 식별자
     nonisolated static var staticTtsVoice: String {
-        return staticIsChinese ? "Cherry" : "Ethan"
+        let savedLanguage = UserDefaults.standard.string(forKey: "app_language") ?? "system"
+        switch savedLanguage {
+        case "zh-Hans": return "Cherry"
+        case "ko": return "Yuna"
+        default: return "Ethan"
+        }
     }
 }
 
-// MARK: - String Extension for Localization
-
 extension String {
-    /// Localized string - can be called from any thread
     var localized: String {
-        return LanguageManager.currentBundle.localizedString(forKey: self, value: nil, table: nil)
-    }
-
-    /// Localized string with format arguments - can be called from any thread
-    func localized(_ args: CVarArg...) -> String {
-        let format = LanguageManager.currentBundle.localizedString(forKey: self, value: nil, table: nil)
-        return String(format: format, arguments: args)
+        return NSLocalizedString(self, comment: "")
     }
 }
