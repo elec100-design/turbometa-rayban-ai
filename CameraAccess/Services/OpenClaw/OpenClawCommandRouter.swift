@@ -2,6 +2,7 @@
  * OpenClaw Command Router
  * 将 Gateway 的 invoke 命令路由到 DAT SDK
  * 支持: camera.snap, camera.list, device.status, device.info
+ * 방식 B(핸즈프리): camera.snap 후 Vision AI 분석 → TTS 출력
  */
 
 import Foundation
@@ -12,6 +13,13 @@ import MWDATCore
 class OpenClawCommandRouter {
     private weak var streamViewModel: StreamSessionViewModel?
     private let nodeId: String
+
+    private static let handsFreeModeKey = "openclaw_handsfree_enabled"
+
+    static var isHandsFreeEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: handsFreeModeKey) }
+        set { UserDefaults.standard.set(newValue, forKey: handsFreeModeKey) }
+    }
 
     init(streamViewModel: StreamSessionViewModel, nodeId: String = "rayban-node") {
         self.streamViewModel = streamViewModel
@@ -103,6 +111,42 @@ class OpenClawCommandRouter {
             ],
             error: nil
         )
+    }
+
+    // MARK: - Hands-Free Analysis (방식 B)
+
+    private func performHandsFreeAnalysis(base64Image: String) async {
+        print("[OpenClaw] HandsFree: 이미지 분석 시작...")
+
+        guard let imageData = Data(base64Encoded: base64Image),
+              let image = UIImage(data: imageData) else {
+            print("[OpenClaw] HandsFree: Base64 디코딩 실패")
+            return
+        }
+
+        let optimizedImage = Self.resizeImage(image, maxDimension: 1024)
+        let visionService = QuickVisionService()
+
+        do {
+            let description = try await visionService.analyzeImage(
+                optimizedImage,
+                customPrompt: "현재 상황을 짧게 한국어로 설명해줘"
+            )
+            print("[OpenClaw] HandsFree: 분석 완료 → \(description.prefix(80))")
+            TTSService.shared.speak(description)
+        } catch {
+            print("[OpenClaw] HandsFree: 분석 실패 - \(error.localizedDescription)")
+            TTSService.shared.speak("이미지 분석에 실패했습니다")
+        }
+    }
+
+    private static func resizeImage(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
+        let currentMax = max(image.size.width, image.size.height)
+        guard currentMax > maxDimension else { return image }
+        let scale = maxDimension / currentMax
+        let newSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let renderer = UIGraphicsImageRenderer(size: newSize)
+        return renderer.image { _ in image.draw(in: CGRect(origin: .zero, size: newSize)) }
     }
 
     // MARK: - camera.list

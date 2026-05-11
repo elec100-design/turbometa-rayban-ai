@@ -127,7 +127,7 @@ class OmniRealtimeViewModel: ObservableObject {
             }
         }
 
-        omniService.onAudioDone = { [weak self] in
+        omniService.onAudioDone = {
             Task { @MainActor in
                 // Audio playback complete
             }

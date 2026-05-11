@@ -30,11 +30,11 @@ struct GalleryView: View {
                             .font(.system(size: 60))
                             .foregroundColor(AppColors.textTertiary)
 
-                        Text("暂无照片")
+                        Text("gallery.empty".localized)
                             .font(AppTypography.title2)
                             .foregroundColor(AppColors.textPrimary)
 
-                        Text("使用 Live AI 拍摄照片后将显示在这里")
+                        Text("gallery.empty.hint".localized)
                             .font(AppTypography.subheadline)
                             .foregroundColor(AppColors.textSecondary)
                             .multilineTextAlignment(.center)
@@ -55,7 +55,7 @@ struct GalleryView: View {
                     }
                 }
             }
-            .navigationTitle("图库")
+            .navigationTitle("gallery.title".localized)
             .sheet(isPresented: $showPhotoDetail) {
                 if let photo = selectedPhoto {
                     PhotoDetailView(photo: photo)
@@ -128,7 +128,7 @@ struct PhotoDetailView: View {
                     // AI Description (if available)
                     if let description = photo.aiDescription {
                         VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                            Text("AI 识别")
+                            Text("gallery.ai.recognition".localized)
                                 .font(AppTypography.headline)
                                 .foregroundColor(.white)
 

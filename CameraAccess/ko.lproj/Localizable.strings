@@ -1,0 +1,515 @@
+/*
+ * 한국어 로컬라이제이션
+ * Korean Localization
+ */
+
+// MARK: - App General
+"app.name" = "TurboMeta";
+"app.subtitle" = "RayBan Meta 어시스턴트";
+"ok" = "확인";
+"cancel" = "취소";
+"close" = "닫기";
+"done" = "완료";
+"error" = "오류";
+"loading" = "로딩 중...";
+"save" = "저장";
+"delete" = "삭제";
+"retry" = "다시 시도";
+"back" = "뒤로";
+
+// MARK: - Home Screen
+"home.title" = "홈";
+"home.subtitle" = "RayBan Meta 어시스턴트";
+"home.liveai.title" = "Live AI";
+"home.liveai.subtitle" = "실시간 대화";
+"home.quickvision.title" = "퀵 비전";
+"home.quickvision.subtitle" = "Siri 음성 트리거";
+"home.translate.title" = "실시간 번역";
+"home.translate.subtitle" = "18개 언어";
+"home.leaneat.title" = "LeanEat";
+"home.leaneat.subtitle" = "칼로리 인식";
+"home.wordlearn.title" = "WordLearn";
+"home.wordlearn.subtitle" = "단어 학습";
+"home.livestream.title" = "라이브 스트리밍";
+"home.livestream.subtitle" = "스트리밍 플랫폼";
+"home.rtmp.title" = "RTMP 스트리밍";
+"home.rtmp.subtitle" = "YouTube · Twitch · Bilibili";
+"home.experimental" = "실험적 기능";
+"home.comingsoon" = "곧 출시 예정";
+
+// Home - Connect
+"home.feature.video.title" = "실시간 비디오";
+"home.feature.video.desc" = "안경 시점에서 비디오를 촬영하고 보고 듣는 모든 것을 기록하세요";
+"home.feature.ai.title" = "AI 대화";
+"home.feature.ai.desc" = "실시간 AI 어시스턴트가 언제 어디서나 스마트한 도움을 제공합니다";
+"home.feature.audio.title" = "오픈 오디오";
+"home.feature.audio.desc" = "주변 소리를 들으면서 알림을 받을 수 있습니다";
+"home.connect.redirect" = "Meta AI 앱으로 이동하여 연결을 확인합니다";
+"home.connecting" = "연결 중...";
+"home.connect.button" = "Ray-Ban Meta 연결";
+"home.connect.success" = "연결 성공";
+"home.connect.entering" = "TurboMeta에 진입 중...";
+
+// MARK: - Permissions
+"permissions.title" = "권한이 필요합니다";
+"permissions.subtitle" = "TurboMeta가 정상적으로 작동하려면 다음 권한이 필요합니다";
+"permissions.mic" = "마이크";
+"permissions.mic.desc" = "음성 대화 및 녹음";
+"permissions.photos" = "사진 앨범";
+"permissions.photos.desc" = "안경으로 촬영한 사진 저장";
+"permissions.notgranted" = "일부 권한이 부여되지 않았습니다";
+"permissions.opensettings" = "설정으로 이동";
+"permissions.continue.limited" = "계속 사용 (기능 제한)";
+"permissions.grant" = "권한 부여";
+
+// MARK: - Live AI
+"liveai.title" = "Live AI";
+"liveai.connected" = "연결됨";
+"liveai.connecting" = "연결 중...";
+"liveai.disconnected" = "연결 안 됨";
+"liveai.speaking" = "AI 말하는 중";
+"liveai.listening" = "듣는 중...";
+"liveai.thinking" = "생각 중...";
+"liveai.stop" = "중지";
+"liveai.start" = "시작";
+"liveai.device.notconnected.title" = "RayBan Meta 안경이 연결되지 않았습니다";
+"liveai.device.notconnected.message" = "먼저 홈 화면에서 스마트 안경을 연결한 후\nLive AI 기능을 사용하세요";
+"liveai.device.backtohome" = "홈으로 돌아가기";
+
+// MARK: - Quick Vision
+"quickvision.title" = "퀵 비전";
+"quickvision.recognizing" = "인식 중";
+"quickvision.result" = "인식 결과";
+"quickvision.start" = "인식 시작";
+"quickvision.processing" = "처리 중...";
+"quickvision.glasses.notconnected" = "안경 미연결";
+"quickvision.siri.tip.title" = "Siri 단축어";
+"quickvision.siri.tip.description" = "다음 방법으로 퀵 비전을 실행할 수 있습니다:";
+"quickvision.siri.tip.voice" = "Siri야, TurboMeta 퀵 비전 실행해줘";
+"quickvision.siri.tip.action" = "단축어 앱의 잠금 화면 위젯에 추가";
+"quickvision.siri.support" = "Siri 및 단축어 지원";
+"quickvision.stop.speaking" = "음성 중지";
+"quickvision.replay" = "다시 재생";
+"quickvision.error.nodevice" = "안경이 연결되지 않았습니다. Meta View에서 먼저 페어링하세요";
+"quickvision.error.streamfailed" = "비디오 스트림 시작 실패. 안경 연결 상태를 확인하세요";
+"quickvision.error.timeout" = "비디오 프레임 대기 시간 초과. 다시 시도하세요";
+"quickvision.error.noimage" = "이미지를 처리할 수 없습니다";
+"quickvision.error.apikey" = "먼저 설정에서 API Key를 설정하세요";
+
+// MARK: - Stream View (Camera)
+"stream.title" = "카메라";
+"stream.stop" = "스트리밍 중지";
+"stream.photo" = "사진 촬영";
+"stream.timer" = "타이머";
+"stream.ending" = "%@ 후 스트리밍 종료";
+"stream.device.notconnected.title" = "RayBan Meta 안경이 연결되지 않았습니다";
+"stream.device.notconnected.message" = "먼저 홈 화면에서 스마트 안경을 연결한 후\n스트리밍 기능을 사용하세요";
+"stream.device.backtohome" = "홈으로 돌아가기";
+"stream.connecting" = "안경 연결 중...";
+"stream.waiting" = "비디오 스트림 대기 중...";
+
+// MARK: - Photo Preview
+"photo.share" = "공유";
+"photo.ai" = "AI 인식";
+"photo.nutrition" = "영양 분석";
+"photo.save" = "사진에 저장";
+"photo.saved" = "저장됨";
+
+// MARK: - LeanEat (Nutrition Analysis)
+"leaneat.title" = "영양 분석";
+"leaneat.analyzing" = "분석 중...";
+"leaneat.healthscore" = "건강 점수";
+"leaneat.totalnutrition" = "총 영양 성분";
+"leaneat.calories" = "칼로리";
+"leaneat.protein" = "단백질";
+"leaneat.fat" = "지방";
+"leaneat.carbs" = "탄수화물";
+"leaneat.fiber" = "식이 섬유";
+"leaneat.sugar" = "당분";
+"leaneat.foods" = "음식 상세";
+"leaneat.suggestions" = "영양 조언";
+"leaneat.portion" = "1인분";
+"leaneat.rating.excellent" = "우수";
+"leaneat.rating.good" = "양호";
+"leaneat.rating.fair" = "보통";
+"leaneat.rating.poor" = "미흡";
+"leaneat.healthscore.excellent" = "매우 건강함";
+"leaneat.healthscore.good" = "꽤 건강함";
+"leaneat.healthscore.fair" = "나쁘지 않음";
+"leaneat.healthscore.poor" = "개선 필요";
+"leaneat.error.title" = "분석 실패";
+"leaneat.retry" = "다시 시도";
+"leaneat.nav.title" = "LeanEat 영양 분석";
+"leaneat.ai.analyzing" = "AI가 음식 영양을 분석 중...";
+"leaneat.ai.wait" = "잠시만 기다려 주세요";
+"leaneat.analysis.failed" = "분석 실패";
+"leaneat.start.analysis" = "분석 시작";
+"leaneat.start.hint" = "아래 버튼을 눌러 음식 영양 분석을 시작하세요";
+"leaneat.food.details" = "음식 상세";
+
+// MARK: - Vision Recognition
+"vision.title" = "AI 이미지 인식";
+"vision.analyzing" = "AI 분석 중...";
+"vision.result" = "인식 결과";
+"vision.nav.title" = "AI 시각 인식";
+"vision.question" = "질문 내용";
+"vision.question.placeholder" = "질문을 입력하세요...";
+"vision.quickquestions" = "빠른 질문";
+"vision.start.analysis" = "분석 시작";
+"vision.copy.result" = "결과 복사";
+
+// MARK: - Records
+"records.title" = "기록";
+"records.empty" = "기록 없음";
+"records.conversation" = "대화 기록";
+"records.date" = "날짜";
+"records.tab.translate" = "실시간 번역";
+"records.liveai.empty" = "Live AI 대화 기록이 없습니다";
+"records.liveai.empty.hint" = "Live AI 기능 사용 후 기록이 여기에 표시됩니다";
+"records.translate.empty" = "번역 기록이 없습니다";
+"records.leaneat.empty" = "칼로리 인식 기록이 없습니다";
+"records.wordlearn.empty" = "단어 학습 기록이 없습니다";
+"records.comingsoon" = "곧 출시 예정";
+"records.messages.count" = "%d개의 메시지";
+
+// MARK: - Conversation Detail
+"conversation.detail" = "대화 상세";
+
+// MARK: - Gallery
+"gallery.title" = "갤러리";
+"gallery.empty" = "사진 없음";
+"gallery.empty.hint" = "Live AI로 사진을 촬영하면 여기에 표시됩니다";
+"gallery.ai.recognition" = "AI 인식";
+
+// MARK: - Settings
+"settings.title" = "설정";
+"settings.device" = "기기 관리";
+"settings.device.status" = "기기 상태";
+"settings.device.online" = "온라인";
+"settings.device.offline" = "오프라인";
+"settings.device.connected" = "연결됨";
+"settings.device.notconnected" = "연결 안 됨";
+"settings.device.stream" = "비디오 스트림";
+"settings.device.stream.active" = "활성";
+"settings.device.stream.inactive" = "비활성";
+"settings.ai" = "AI 설정";
+
+// API Provider
+"settings.provider" = "API 제공자";
+"settings.provider.select" = "API 제공자 선택";
+"settings.provider.description" = "AI 비전에 사용할 API 서비스 제공자를 선택하세요";
+"settings.provider.alibaba.desc" = "알리바바 Qwen 비전 모델";
+"settings.provider.openrouter.desc" = "통합 API, 500+ AI 모델";
+"settings.provider.getapikey" = "API Key 발급받기";
+
+// Model Settings
+"settings.model" = "모델 설정";
+"settings.model.select" = "모델 선택";
+"settings.model.current" = "현재 사용 중";
+"settings.model.alibaba" = "알리바바 모델";
+"settings.model.openrouter" = "OpenRouter 모델";
+"settings.model.qwen3vlplus.desc" = "고성능 비전 모델";
+"settings.model.qwen3vlmax.desc" = "최강 비전 모델";
+"settings.model.search" = "모델 검색...";
+"settings.model.visiononly" = "비전 지원 모델만 표시";
+"settings.model.loading" = "모델 목록 로딩 중...";
+"settings.model.retry" = "다시 시도";
+"settings.model.notfound" = "일치하는 모델을 찾을 수 없습니다";
+
+// Endpoint Settings
+"settings.endpoint" = "서비스 지역";
+"settings.endpoint.beijing.desc" = "중국 내 사용자";
+"settings.endpoint.singapore.desc" = "해외 사용자";
+"settings.endpoint.description" = "지역별 API Key는 호환되지 않습니다";
+
+// Live AI Settings
+"settings.liveai" = "Live AI";
+"settings.liveai.provider" = "Live AI 제공자";
+"settings.liveai.provider.select" = "Live AI 제공자 선택";
+"settings.liveai.provider.description" = "실시간 음성 대화에 사용할 제공자를 선택하세요";
+"settings.liveai.alibaba.desc" = "Qwen Omni 실시간 오디오 모델";
+"settings.liveai.google.desc" = "Gemini Live 실시간 오디오 모델";
+
+"settings.language" = "출력 언어";
+"settings.language.select" = "출력 언어 선택";
+"settings.language.description" = "AI가 이 언어로 음성 출력 및 텍스트 응답을 제공합니다";
+"settings.applanguage" = "앱 언어";
+"settings.applanguage.select" = "앱 언어 선택";
+"settings.applanguage.description" = "앱 인터페이스 언어를 변경합니다";
+"settings.applanguage.restart.title" = "재시작 필요";
+"settings.applanguage.restart.message" = "언어 변경을 적용하려면 앱을 재시작해야 합니다";
+"settings.applanguage.restart.confirm" = "지금 재시작";
+
+// API Key
+"settings.apikey" = "API Key 관리";
+"settings.apikey.manage" = "API Key 관리";
+"settings.apikey.status" = "API Key 상태";
+"settings.apikey.configured" = "설정됨";
+"settings.apikey.notconfigured" = "미설정";
+"settings.apikey.placeholder" = "API Key를 입력하세요";
+"settings.apikey.alibaba.help" = "알리바바 클라우드 콘솔에서 API Key를 발급받으세요";
+"settings.apikey.openrouter.help" = "OpenRouter 웹사이트에서 API Key를 발급받으세요";
+"settings.apikey.google.help" = "Google AI Studio에서 API Key를 발급받으세요";
+"settings.apikey.get" = "API Key 발급받기";
+"settings.apikey.delete" = "API Key 삭제";
+"settings.apikey.saved" = "저장 완료";
+"settings.apikey.saved.message" = "API Key가 안전하게 저장되었습니다";
+"settings.apikey.empty" = "API Key를 입력해 주세요";
+"settings.apikey.savefailed" = "저장 실패, 다시 시도해 주세요";
+"settings.apikey.deletefailed" = "삭제 실패, 다시 시도해 주세요";
+
+"settings.quality" = "비디오 화질";
+"settings.quality.select" = "비디오 화질 선택";
+"settings.quality.description" = "높은 화질은 배터리를 더 소모합니다";
+"settings.quality.low" = "저화질";
+"settings.quality.low.desc" = "절전 모드, 장시간 사용에 적합";
+"settings.quality.medium" = "중화질";
+"settings.quality.medium.desc" = "균형 모드 (권장)";
+"settings.quality.high" = "고화질";
+"settings.quality.high.desc" = "최고 화질, 배터리 소모 높음";
+
+// Google
+"settings.google.apikey" = "Google API Key";
+"settings.google.gemini.apikey" = "Google Gemini API Key";
+
+"settings.about" = "정보";
+"settings.version" = "버전";
+"settings.sdkversion" = "SDK 버전";
+
+// MARK: - Tabs
+"tab.home" = "홈";
+"tab.records" = "기록";
+"tab.gallery" = "갤러리";
+"tab.settings" = "설정";
+
+// MARK: - Errors
+"error.network" = "네트워크 오류, 연결 상태를 확인하세요";
+"error.api" = "API 오류";
+"error.api.code" = "API 오류: %d";
+"error.permission.denied" = "권한이 거부되었습니다. 설정에서 활성화하세요";
+"error.device.notfound" = "기기를 찾을 수 없습니다";
+"error.device.notconnected" = "기기가 연결되지 않았습니다";
+"error.timeout" = "작업 시간 초과, 다시 시도하세요";
+"error.unknown" = "알 수 없는 오류";
+"error.invalidresponse" = "잘못된 응답";
+"error.noaudiodata" = "오디오 데이터를 수신하지 못했습니다";
+"error.playbackfailed" = "오디오 재생 실패";
+
+// MARK: - TTS
+"tts.speaking" = "음성 출력 중...";
+"tts.stopped" = "중지됨";
+
+// MARK: - Units
+"unit.kcal" = "kcal";
+"unit.gram" = "그램";
+"unit.g" = "g";
+
+// MARK: - AI Prompts
+"prompt.quickvision" = "당신은 스마트 안경 AI 어시스턴트입니다. 이미지 내용을 간결하게 설명하세요. 음성 안내에 적합해야 합니다.\n\n요구사항:\n1. 1-2문장으로 주요 내용을 설명\n2. 자연스러운 대화체 사용\n3. 구두점을 과도하게 사용하지 않기\n4. 총 50단어 이내\n5. 직접 설명하기, \"이미지에서\" 또는 \"보입니다\"라고 말하지 않기";
+"prompt.liveai" = "당신은 RayBan Meta 스마트 안경 AI 어시스턴트입니다.\n\n[중요] 항상 한국어로 답변하세요.\n\n답변은 간결하고 대화체로, 친구와 대화하듯이 하세요. 사용자가 안경을 착용하고 주변을 볼 수 있으므로, 보이는 것을 바탕으로 빠르고 유용한 제안을 하세요. 핵심만 간결하게 전달하세요.";
+
+// MARK: - Quick Vision Modes
+"prompt.quickvision.health" = "이 식품/음료의 건강 측면을 분석하세요. 다음 각도에서 과학적으로 분석:\n1. 영양 균형\n2. 첨가물 및 방부제\n3. 당분/나트륨/지방 함량\n4. 건강에 미치는 잠재적 영향\n5. 건강 권장 사항\n\n음성 안내에 적합한 간결한 구어체로, 100단어 이내.";
+"prompt.quickvision.blind" = "시각 장애인 사용자를 위해 주변 환경을 상세히 설명하세요:\n1. 주변의 물체와 사람\n2. 대략적인 거리와 방향\n3. 장애물이나 위험 요소\n4. 전체적인 분위기 (실내/실외, 조명 등)\n5. 주의해야 할 세부 사항\n\n명확하고 구체적으로, 방향어 (앞쪽, 왼쪽 등) 사용, 80단어 이내.";
+"prompt.quickvision.reading" = "이미지 속 텍스트를 식별하고 읽어주세요. 요구사항:\n1. 모든 보이는 텍스트를 정확히 식별\n2. 읽기 순서대로 내용 정리\n3. 메뉴/간판이면 유형 언급\n4. 텍스트가 불명확하면 언급\n\n텍스트 내용을 직접 읽기, 추가 설명 불필요.";
+"prompt.quickvision.translate" = "이미지 속 텍스트를 식별하고 {LANGUAGE}로 번역하세요. 요구사항:\n1. 모든 보이는 텍스트를 정확히 식별\n2. 정확하고 자연스럽게 번역\n3. 여러 단락이면 분리하여 번역\n4. 번역 결과만 말하기, 원문 언급 불필요\n\n음성 안내에 적합, 100단어 이내.";
+"prompt.quickvision.encyclopedia" = "이미지 속 물체, 건물, 예술품 또는 생물을 식별하고 백과사전 스타일로 정보를 제공하세요:\n1. 이름과 분류\n2. 역사적 배경 또는 기원\n3. 흥미로운 사실\n4. 문화적 의미\n\n박물관 가이드처럼, 생동감 있고 유익하게, 음성 안내에 적합, 100단어 이내.";
+
+"quickvision.mode.standard" = "기본 모드";
+"quickvision.mode.health" = "건강 분석";
+"quickvision.mode.blind" = "접근성 모드";
+"quickvision.mode.reading" = "읽기 모드";
+"quickvision.mode.translate" = "번역 모드";
+"quickvision.mode.encyclopedia" = "백과사전 모드";
+"quickvision.mode.custom" = "사용자 정의 프롬프트";
+
+"quickvision.mode.standard.desc" = "일반 이미지 설명";
+"quickvision.mode.health.desc" = "식품 건강 분석";
+"quickvision.mode.blind.desc" = "접근성을 위한 환경 설명";
+"quickvision.mode.reading.desc" = "텍스트 인식 및 읽기";
+"quickvision.mode.translate.desc" = "텍스트 인식 및 번역";
+"quickvision.mode.encyclopedia.desc" = "백과사전 정보";
+"quickvision.mode.custom.desc" = "사용자 정의 프롬프트 사용";
+
+"quickvision.settings" = "비전 설정";
+"quickvision.settings.mode" = "비전 모드";
+"quickvision.settings.customprompt" = "사용자 정의 프롬프트";
+"quickvision.settings.targetlanguage" = "번역 대상 언어";
+"quickvision.settings.history" = "비전 기록";
+"quickvision.history" = "비전 기록";
+"quickvision.history.empty" = "비전 기록 없음";
+"quickvision.history.clear" = "기록 삭제";
+"quickvision.history.clear.confirm" = "모든 비전 기록을 삭제하시겠습니까?";
+"quickvision.today" = "오늘";
+"quickvision.yesterday" = "어제";
+"quickvision.custom.default" = "이미지 내용을 간결하게 설명해주세요. 음성 안내에 적합해야 합니다.";
+"quickvision.tab" = "퀵 비전";
+"quickvision.records.empty" = "비전 기록 없음";
+"quickvision.records.empty.hint" = "퀵 비전 사용 후 기록이 여기에 표시됩니다";
+
+// MARK: - Live AI Modes
+"liveai.mode.standard" = "기본 모드";
+"liveai.mode.museum" = "박물관 모드";
+"liveai.mode.blind" = "접근성 모드";
+"liveai.mode.reading" = "읽기 모드";
+"liveai.mode.translate" = "번역 모드";
+"liveai.mode.custom" = "사용자 정의 프롬프트";
+
+"liveai.mode.standard.desc" = "자유 대화, 음성 시 이미지 확인";
+"liveai.mode.museum.desc" = "박물관 가이드, 전시물 설명";
+"liveai.mode.blind.desc" = "접근성을 위한 환경 설명";
+"liveai.mode.reading.desc" = "텍스트 인식 및 읽기";
+"liveai.mode.translate.desc" = "보이는 텍스트 실시간 번역";
+"liveai.mode.custom.desc" = "사용자 정의 시스템 프롬프트 사용";
+
+"liveai.settings" = "대화 모드";
+"liveai.settings.mode" = "대화 모드";
+"liveai.settings.mode.footer" = "모드에 따라 AI 동작이 달라집니다. 재연결 후 적용됩니다.";
+"liveai.settings.customprompt" = "사용자 정의 시스템 프롬프트";
+"liveai.settings.customprompt.footer" = "AI의 역할과 동작을 설정합니다. 다음 연결 시 적용됩니다.";
+"liveai.settings.targetlanguage" = "번역 대상 언어";
+"liveai.custom.default" = "당신은 유용한 어시스턴트입니다. 질문에 간결하게 답변하세요.";
+
+// Live AI Mode Prompts
+"prompt.liveai.standard" = "당신은 RayBan Meta 스마트 안경 AI 어시스턴트입니다.\n\n[중요] 항상 한국어로 답변하세요.\n\n답변은 간결하고 대화체로, 친구와 대화하듯이 하세요. 사용자가 안경을 착용하고 주변을 볼 수 있으므로, 보이는 것을 바탕으로 빠르고 유용한 제안을 하세요.";
+"prompt.liveai.museum" = "당신은 전문 박물관 가이드 AI 어시스턴트입니다.\n\n[중요] 항상 한국어로 답변하세요.\n\n사용자가 전시물을 보면:\n1. 이름과 기본 정보\n2. 역사적 배경과 문화적 의미\n3. 흥미로운 이야기나 사실\n4. 다른 전시물과의 연관성\n\n지식이 풍부하면서도 재미있게 설명하세요.";
+"prompt.liveai.blind" = "당신은 시각 장애인을 위한 스마트 안경 어시스턴트입니다.\n\n[중요] 항상 한국어로 답변하세요.\n\n사용자가 주변을 이해하도록 도와주세요:\n1. 주변의 물체, 사람, 환경을 상세히 설명\n2. 명확한 방향어 사용 (앞쪽, 왼쪽, 오른쪽 뒤 등)\n3. 장애물이나 위험 요소 지적\n4. 간판, 메뉴 등의 텍스트 읽기\n5. 안전하고 실용적인 안내 제공";
+"prompt.liveai.reading" = "당신은 읽기 보조 AI 어시스턴트입니다.\n\n[중요] 항상 한국어로 답변하세요.\n\n사용자가 보이는 텍스트를 읽도록 도와주세요:\n1. 보이는 모든 텍스트를 정확히 식별하고 읽기\n2. 올바른 순서로 내용 정리\n3. 문서라면 구조 설명\n4. 외국어라면 먼저 읽고 번역";
+"prompt.liveai.translate" = "당신은 실시간 번역 AI 어시스턴트입니다.\n\n[중요] 번역 결과는 반드시 {LANGUAGE}로 제공하세요.\n\n사용자가 외국어 내용을 이해하도록 도와주세요:\n1. 화면 속 텍스트 식별\n2. {LANGUAGE}로 번역\n3. 메뉴나 간판이면 용도 설명\n4. 전문 용어에 간단한 설명 추가";
+
+// MARK: - RTMP Streaming
+"rtmp.title" = "RTMP 스트리밍";
+"rtmp.status.disconnected" = "연결 안 됨";
+"rtmp.status.connecting" = "연결 중...";
+"rtmp.status.connected" = "연결됨";
+"rtmp.status.streaming" = "스트리밍 중";
+"rtmp.connecting.video" = "비디오 스트림 연결 중...";
+"rtmp.frames" = "프레임";
+"rtmp.time" = "시간";
+"rtmp.data" = "데이터";
+"rtmp.start" = "스트리밍 시작";
+"rtmp.stop" = "스트리밍 중지";
+"rtmp.url.placeholder" = "RTMP 서버 URL";
+"rtmp.key.placeholder" = "스트림 키";
+"rtmp.settings" = "스트리밍 설정";
+"rtmp.settings.bitrate" = "비트레이트";
+"rtmp.settings.bitrate.description" = "비트레이트가 높을수록 화질이 좋지만 더 많은 대역폭이 필요합니다";
+"rtmp.settings.platform" = "플랫폼 프리셋";
+"rtmp.settings.note" = "참고";
+"rtmp.settings.experimental" = "실험적 기능";
+"rtmp.settings.experimental.description" = "RTMP 스트리밍은 실험적 기능입니다. 일부 플랫폼은 추가 설정이 필요할 수 있습니다.";
+"rtmp.recommended" = "권장";
+"rtmp.platform.custom" = "사용자 지정";
+"rtmp.error.invalidurl" = "유효한 RTMP URL을 입력하세요";
+
+// MARK: - Live Translate
+"livetranslate.title" = "실시간 번역";
+"livetranslate.connected" = "연결됨";
+"livetranslate.connecting" = "연결 중...";
+"livetranslate.recording" = "녹음 중";
+"livetranslate.placeholder" = "녹음 버튼을 눌러 말하기 시작하세요";
+"livetranslate.source" = "원본 언어";
+"livetranslate.target" = "대상 언어";
+"livetranslate.clear" = "지우기";
+
+// Live Translate Settings
+"livetranslate.settings.title" = "번역 설정";
+"livetranslate.settings.sourceLanguage" = "원본 언어";
+"livetranslate.settings.targetLanguage" = "대상 언어";
+"livetranslate.settings.targetLanguage.footer" = "대상 언어는 음성 출력을 지원합니다";
+"livetranslate.settings.voice" = "음색";
+"livetranslate.settings.voice.footer" = "음색마다 지원하는 언어가 다릅니다";
+"livetranslate.settings.output" = "출력 설정";
+"livetranslate.settings.audioOutput" = "음성 출력";
+"livetranslate.settings.imageEnhance" = "시각 보정";
+"livetranslate.settings.imageEnhance.footer" = "시각 보정을 활성화하면 동음이의어 번역 정확도가 향상됩니다";
+"livetranslate.settings.history" = "번역 기록";
+"livetranslate.settings.clearHistory" = "기록 삭제";
+"livetranslate.settings.historyCount" = "번역 기록 %d건";
+"common.done" = "완료";
+"common.ok" = "확인";
+
+// Live Translate Languages
+"livetranslate.lang.en" = "영어";
+"livetranslate.lang.zh" = "중국어";
+"livetranslate.lang.ja" = "일본어";
+"livetranslate.lang.ko" = "한국어";
+"livetranslate.lang.fr" = "프랑스어";
+"livetranslate.lang.de" = "독일어";
+"livetranslate.lang.ru" = "러시아어";
+"livetranslate.lang.es" = "스페인어";
+"livetranslate.lang.pt" = "포르투갈어";
+"livetranslate.lang.it" = "이탈리아어";
+"livetranslate.lang.yue" = "광둥어";
+"livetranslate.lang.id" = "인도네시아어";
+"livetranslate.lang.vi" = "베트남어";
+"livetranslate.lang.th" = "태국어";
+"livetranslate.lang.ar" = "아랍어";
+"livetranslate.lang.hi" = "힌디어";
+"livetranslate.lang.el" = "그리스어";
+"livetranslate.lang.tr" = "터키어";
+
+// Live Translate Voices
+"livetranslate.voice.cherry" = "Cherry";
+"livetranslate.voice.nofish" = "Nofish";
+"livetranslate.voice.jada" = "Jada";
+"livetranslate.voice.dylan" = "Dylan";
+"livetranslate.voice.sunny" = "Sunny";
+"livetranslate.voice.peter" = "Peter";
+"livetranslate.voice.kiki" = "Kiki";
+"livetranslate.voice.eric" = "Eric";
+
+"livetranslate.voice.cherry.desc" = "따뜻한 여성, 다국어 지원";
+"livetranslate.voice.nofish.desc" = "자연스러운 여성, 다국어 지원";
+"livetranslate.voice.jada.desc" = "활발한 여성, 중국어 전용";
+"livetranslate.voice.dylan.desc" = "매력적인 남성, 중국어 전용";
+"livetranslate.voice.sunny.desc" = "밝은 여성, 중국어 전용";
+"livetranslate.voice.peter.desc" = "안정적인 남성, 중국어 전용";
+"livetranslate.voice.kiki.desc" = "광둥어 여성, 광둥어 전용";
+"livetranslate.voice.eric.desc" = "성숙한 남성, 중국어 전용";
+
+// Live Translate Errors
+"livetranslate.error.title" = "번역 오류";
+"livetranslate.error.noApiKey" = "먼저 설정에서 API Key를 설정하세요";
+"livetranslate.error.cannotSwap" = "현재 언어 조합은 교환할 수 없습니다";
+
+// Live Translate Microphone
+"livetranslate.settings.microphone" = "마이크";
+"livetranslate.settings.usePhoneMic" = "iPhone 마이크 사용";
+"livetranslate.settings.microphone.footer" = "활성화하면 iPhone 마이크로 상대방 말을 번역합니다. 비활성화하면 안경 마이크로 본인의 말을 번역합니다";
+
+// Live Translate Home Card
+"home.translate.title" = "실시간 번역";
+"home.translate.subtitle" = "18개 언어";
+
+// OpenClaw Integration
+"settings.integrations" = "연동";
+"openclaw.status.connected" = "연결됨";
+"openclaw.status.connecting" = "연결 중...";
+"openclaw.status.pairing" = "페어링 대기 중";
+"openclaw.status.disconnected" = "연결 안 됨";
+"openclaw.connect" = "게이트웨이 연결";
+"openclaw.disconnect" = "연결 해제";
+"openclaw.pairing.hint" = "터미널에서 'openclaw devices approve'를 실행하여 페어링을 완료하세요";
+"openclaw.gateway.help" = "OpenClaw Gateway가 실행 중인 기기의 주소와 포트를 입력하세요. 기본값은 127.0.0.1:18789입니다";
+"openclaw.capabilities" = "기기 기능";
+"openclaw.capabilities.desc" = "연결되면 OpenClaw AI가 안경을 통해 사진 촬영, 기기 상태 확인 등을 할 수 있습니다";
+"home.openclaw.subtitle" = "OpenClaw";
+"home.openclaw.connected" = "연결됨";
+"openclaw.chat.placeholder" = "메시지를 입력하세요...";
+"openclaw.chat.photoprompt" = "안경으로 촬영한 사진을 확인해 주세요";
+"openclaw.chat.snap" = "촬영 후 전송";
+"openclaw.chat.sending" = "전송 중...";
+"openclaw.chat.noframe" = "안경 화면을 가져올 수 없습니다. 연결을 확인하세요";
+"openclaw.chat.noapikey" = "먼저 설정에서 알리바바 API Key를 설정하세요";
+"openclaw.chat.sendvoice" = "전송";
+"openclaw.chat.text" = "텍스트";
+"openclaw.chat.listening" = "듣는 중...";
+
+// OpenClaw Settings
+"openclaw.settings.status" = "상태";
+"openclaw.settings.host" = "호스트";
+"openclaw.settings.port" = "포트";
+"openclaw.settings.token" = "게이트웨이 토큰";
+"openclaw.settings.gateway" = "게이트웨이";
+"openclaw.settings.commands" = "명령어";

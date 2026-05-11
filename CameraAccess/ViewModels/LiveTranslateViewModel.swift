@@ -213,7 +213,7 @@ class LiveTranslateViewModel: ObservableObject {
             }
         }
 
-        translateService?.onAudioDone = { [weak self] in
+        translateService?.onAudioDone = {
             DispatchQueue.main.async {
                 print("🔊 [TranslateVM] 音频播放完成")
             }

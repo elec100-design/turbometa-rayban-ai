@@ -17,6 +17,7 @@ struct OpenClawChatMessage: Identifiable {
 struct OpenClawChatView: View {
     @ObservedObject var streamViewModel: StreamSessionViewModel
     @ObservedObject var openClawService = OpenClawNodeService.shared
+    @StateObject private var visualAI: OpenClawChatViewModel
     @Environment(\.dismiss) private var dismiss
 
     @State private var messages: [OpenClawChatMessage] = []
@@ -30,6 +31,11 @@ struct OpenClawChatView: View {
     @State private var asrPartial = ""        // current partial
     @State private var asrService: OpenClawASRService?
     @State private var showTextInput = false  // toggle between voice/text mode
+
+    init(streamViewModel: StreamSessionViewModel) {
+        self.streamViewModel = streamViewModel
+        _visualAI = StateObject(wrappedValue: OpenClawChatViewModel(streamViewModel: streamViewModel))
+    }
 
     var body: some View {
         NavigationView {
@@ -61,7 +67,7 @@ struct OpenClawChatView: View {
                         }
                         .padding()
                     }
-                    .onChange(of: messages.count) { _ in
+                    .onChange(of: messages.count) {
                         if let last = messages.last {
                             withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
                         }
@@ -115,6 +121,33 @@ struct OpenClawChatView: View {
                             }
                         }
                         .padding(.horizontal, 16)
+                    }
+
+                    // Visual AI status
+                    if visualAI.isProcessing || !visualAI.statusMessage.isEmpty {
+                        HStack(spacing: 8) {
+                            if visualAI.isProcessing {
+                                ProgressView().scaleEffect(0.8)
+                            }
+                            Text(visualAI.statusMessage)
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 16)
+                    }
+
+                    // Visual AI result
+                    if !visualAI.lastAnalysisResult.isEmpty && !visualAI.isProcessing {
+                        Text(visualAI.lastAnalysisResult)
+                            .font(.system(size: 14))
+                            .foregroundColor(.primary)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(12)
+                            .padding(.horizontal, 16)
                     }
 
                     // Main action buttons
@@ -177,6 +210,21 @@ struct OpenClawChatView: View {
                             .foregroundColor(.purple)
                             .frame(width: 60, height: 60)
                         }
+
+                        // Visual AI (앱 주도 촬영+분석)
+                        Button {
+                            Task { await visualAI.startVisualAISession() }
+                        } label: {
+                            VStack(spacing: 4) {
+                                Image(systemName: "eye.fill")
+                                    .font(.system(size: 22))
+                                Text("Visual AI")
+                                    .font(.system(size: 10))
+                            }
+                            .foregroundColor(visualAI.isProcessing ? .gray : .orange)
+                            .frame(width: 60, height: 60)
+                        }
+                        .disabled(visualAI.isProcessing)
                     }
                     .padding(.vertical, 4)
 
@@ -320,34 +368,44 @@ struct OpenClawChatView: View {
     }
 
     private func startListening() {
-        guard let apiKey = APIKeyManager.shared.getAPIKey(for: .alibaba), !apiKey.isEmpty else {
-            messages.append(OpenClawChatMessage(role: "assistant", text: "openclaw.chat.noapikey".localized, image: nil))
+        // 1. .openrouter로 수정
+        guard let apiKey = APIKeyManager.shared.getAPIKey(for: .openrouter), !apiKey.isEmpty else {
+            let errorMsg = NSLocalizedString("livetranslate.error.noApiKey", comment: "")
+            messages.append(OpenClawChatMessage(role: "assistant", text: errorMsg, image: nil))
             return
         }
 
         asrText = ""
         asrPartial = ""
+        
         let service = OpenClawASRService(apiKey: apiKey)
         self.asrService = service
 
-        service.onPartialResult = { text in
-            asrPartial = text
+        // 구조체(struct)에서는 [weak self] 대신 self를 직접 사용합니다.
+        service.onPartialResult = { (text: String) in
+            DispatchQueue.main.async {
+                self.asrPartial = text
+            }
         }
 
-        service.onFinalResult = { text in
-            asrText += text
-            asrPartial = ""
+        service.onFinalResult = { (text: String) in
+            DispatchQueue.main.async {
+                self.asrText += text
+                self.asrPartial = ""
+            }
         }
 
-        service.onError = { error in
-            isListening = false
-            print("[ASR] Error: \(error)")
+        // onError는 (String) 타입을 받을 확률이 높습니다. String으로 수정했습니다.
+        service.onError = { (error: String) in
+            DispatchQueue.main.async {
+                self.isListening = false
+                print("[ASR] Error: \(error)")
+            }
         }
 
         service.start()
         isListening = true
     }
-
     private func stopListening() {
         asrService?.stop()
         asrService = nil

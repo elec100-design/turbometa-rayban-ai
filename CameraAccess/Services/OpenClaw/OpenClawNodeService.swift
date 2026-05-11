@@ -36,7 +36,7 @@ enum OpenClawConnectionState: Equatable {
 class OpenClawNodeService: NSObject, ObservableObject {
     static let shared = OpenClawNodeService()
 
-    // MARK: - Published State
+    // MARK: - Published State (Must be updated on MainThread)
 
     @Published var connectionState: OpenClawConnectionState = .disconnected
     @Published var isEnabled = UserDefaults.standard.bool(forKey: "openclaw_enabled")
@@ -138,6 +138,23 @@ class OpenClawNodeService: NSObject, ObservableObject {
     /// Chat event callback
     var onChatEvent: ((String) -> Void)?
 
+    // MARK: - App-Initiated Capture (앱 주도 촬영)
+
+    /// WSS를 통해 Gateway에 수동 촬영 명령을 전송
+    func sendManualCaptureCommand() {
+        guard connectionState == .connected else {
+            print("[OpenClaw] sendManualCaptureCommand: not connected, skipping")
+            return
+        }
+        let frame: [String: Any] = [
+            "type": "command",
+            "command": "camera.snap",
+            "payload": [String: Any]()
+        ]
+        sendJSON(frame)
+        print("[OpenClaw] Sent manual capture command via WSS")
+    }
+
     func disconnect() {
         shouldReconnect = false
         reconnectTask?.cancel()
@@ -148,7 +165,10 @@ class OpenClawNodeService: NSObject, ObservableObject {
         webSocket = nil
         urlSession?.invalidateAndCancel()
         urlSession = nil
-        connectionState = .disconnected
+        
+        DispatchQueue.main.async {
+            self.connectionState = .disconnected
+        }
         print("[OpenClaw] Disconnected")
     }
 
@@ -184,20 +204,27 @@ class OpenClawNodeService: NSObject, ObservableObject {
     // MARK: - Connection Logic
 
     private func startConnection() {
-        DispatchQueue.main.async { self.connectionState = .connecting }
+        DispatchQueue.main.async {
+            self.connectionState = .connecting
+        }
 
-        let scheme = "ws"
-        var urlString = "\(scheme)://\(gatewayHost):\(gatewayPort)"
+        // 💡 핵심 수정: Tailscale 도메인(.ts.net)이거나 443 포트면 보안 웹소켓(wss) 사용
+        let scheme = (gatewayHost.contains("ts.net") || gatewayPort == 443) ? "wss" : "ws"
+            
+        var urlString = "\(scheme)://\(gatewayHost):\(gatewayPort)/"
+            
         // Append token as query parameter if available
         if let token = loadGatewayToken(), !token.isEmpty {
             urlString += "?token=\(token)"
         }
         guard let url = URL(string: urlString) else {
-            connectionState = .error("Invalid gateway URL")
+            DispatchQueue.main.async {
+                self.connectionState = .error("Invalid gateway URL")
+            }
             return
         }
 
-        print("[OpenClaw] Connecting to \(scheme)://\(gatewayHost):\(gatewayPort)")
+        print("[OpenClaw] Connecting to \(urlString)")
 
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 10
@@ -210,9 +237,9 @@ class OpenClawNodeService: NSObject, ObservableObject {
         webSocket = urlSession?.webSocketTask(with: url)
         webSocket?.maximumMessageSize = 16 * 1024 * 1024
         webSocket?.resume()
-        // receiveMessage() is called in didOpen delegate
+            // receiveMessage() is called in didOpen delegate
     }
-
+    
     private func saveSettings() {
         UserDefaults.standard.set(isEnabled, forKey: "openclaw_enabled")
         UserDefaults.standard.set(gatewayHost, forKey: "openclaw_host")
@@ -229,9 +256,7 @@ class OpenClawNodeService: NSObject, ObservableObject {
                 self?.receiveMessage()
             case .failure(let error):
                 print("[OpenClaw] Receive error: \(error.localizedDescription)")
-                Task { @MainActor in
-                    self?.handleDisconnect()
-                }
+                self?.handleDisconnect()
             }
         }
     }
@@ -266,7 +291,6 @@ class OpenClawNodeService: NSObject, ObservableObject {
 
         let type = json["type"] as? String
         let method = json["method"] as? String
-
         let event = json["event"] as? String
 
         // OpenClaw protocol: type="event", event="connect.challenge"
@@ -309,7 +333,7 @@ class OpenClawNodeService: NSObject, ObservableObject {
 
         let token = loadGatewayToken() ?? ""
         let role = "operator"
-        let scopes = ["operator.read", "operator.write"]
+        let scopes = ["operator.read", "operator.write", "operator.admin"]
         let clientId = "openclaw-ios"
         let clientMode = "node"
         let platform = "ios"
@@ -384,6 +408,16 @@ class OpenClawNodeService: NSObject, ObservableObject {
     private func handleEvent(method: String?, json: [String: Any]) {
         guard let method else { return }
 
+        // 모든 이벤트 로깅 (물리 버튼, 상태 변경 등 Gateway 이벤트 추적용)
+        let payloadSnippet: String
+        if let payload = json["payload"] as? [String: Any] {
+            let keys = payload.keys.sorted().joined(separator: ",")
+            payloadSnippet = "keys=[\(keys)]"
+        } else {
+            payloadSnippet = "no payload"
+        }
+        print("[OpenClaw] EVT \(method) | \(payloadSnippet)")
+
         switch method {
         case "node.invoke.request", "node.invoke":
             print("[OpenClaw] >>> INVOKE RECEIVED: \(method)")
@@ -402,9 +436,9 @@ class OpenClawNodeService: NSObject, ObservableObject {
                 }
             }
         case "tick", "health":
-            break // suppress noise
+            break
         default:
-            print("[OpenClaw] Event: \(method)")
+            break
         }
     }
 
@@ -439,7 +473,7 @@ class OpenClawNodeService: NSObject, ObservableObject {
             print("[OpenClaw] Response error for \(id): \(code) - \(message)")
 
             if code == "NOT_PAIRED" {
-                Task { @MainActor in
+                DispatchQueue.main.async {
                     self.connectionState = .waitingForPairing
                 }
             }
@@ -520,25 +554,31 @@ class OpenClawNodeService: NSObject, ObservableObject {
     // MARK: - Keepalive
 
     private func startTickWatchdog() {
-        tickTask?.cancel()
-        tickTask = Task { [weak self] in
-            while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: UInt64(Self.tickInterval * 1_000_000_000))
-                guard !Task.isCancelled else { break }
-                self?.sendJSON([
-                    "type": "req",
-                    "id": UUID().uuidString,
-                    "method": "tick",
-                    "params": ["ts": Int64(Date().timeIntervalSince1970 * 1000)]
-                ] as [String: Any])
+            // 기존 작업이 있다면 취소합니다.
+            tickTask?.cancel()
+            
+            // 서버 버전 호환성 문제로 'tick' 메소드 전송을 중단합니다.
+            tickTask = Task {
+                print("[OpenClaw] Tick watchdog disabled to prevent 'unknown method' errors.")
+                
+                while !Task.isCancelled {
+                    // 단순히 루프만 돌며 태스크를 유지합니다.
+                    try? await Task.sleep(nanoseconds: 30 * 1_000_000_000) // 30초 대기
+                    if Task.isCancelled { break }
+                    
+                    // 실제 전송 로직이 없으므로 self를 참조할 필요가 없습니다.
+                }
             }
         }
-    }
 
     // MARK: - Reconnection
 
     private func handleDisconnect() {
-        guard connectionState != .disconnected else { return }
+        // Need to read/write state carefully
+        let isCurrentlyDisconnected = DispatchQueue.main.sync {
+            self.connectionState == .disconnected
+        }
+        guard !isCurrentlyDisconnected else { return }
 
         webSocket = nil
         urlSession?.invalidateAndCancel()
@@ -546,21 +586,27 @@ class OpenClawNodeService: NSObject, ObservableObject {
         tickTask?.cancel()
 
         guard shouldReconnect else {
-            connectionState = .disconnected
+            DispatchQueue.main.async {
+                self.connectionState = .disconnected
+            }
             return
         }
 
         reconnectAttempts += 1
         if reconnectAttempts > Self.maxReconnectAttempts {
             print("[OpenClaw] Max reconnect attempts reached, giving up")
-            connectionState = .error("连接失败，已重试 \(Self.maxReconnectAttempts) 次")
-            shouldReconnect = false
+            DispatchQueue.main.async {
+                self.connectionState = .error("연결 실패, \(Self.maxReconnectAttempts)회 재시도함")
+                self.shouldReconnect = false
+            }
             return
         }
 
         let delay = min(Double(1 << reconnectAttempts), 30.0) // 2, 4, 8, 16, 30s
         print("[OpenClaw] Reconnect attempt \(reconnectAttempts)/\(Self.maxReconnectAttempts) in \(delay)s")
-        connectionState = .disconnected
+        DispatchQueue.main.async {
+            self.connectionState = .disconnected
+        }
         scheduleReconnect(delay: delay)
     }
 

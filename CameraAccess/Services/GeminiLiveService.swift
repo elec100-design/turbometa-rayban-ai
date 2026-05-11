@@ -88,7 +88,7 @@ class GeminiLiveService: NSObject {
     private func configureAudioSession() {
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth, .allowBluetoothA2DP, .defaultToSpeaker])
+            try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP, .allowBluetoothA2DP, .defaultToSpeaker])
             try audioSession.setActive(true, options: [.notifyOthersOnDeactivation])
         } catch {
             print("⚠️ [Gemini] Audio session 配置失败: \(error)")
@@ -194,12 +194,15 @@ class GeminiLiveService: NSObject {
         guard !isRecording else { return }
 
         do {
-            print("🎤 [Gemini] 开始录音")
+            print("🎤 [Gemini] 녹음 시작")
 
-            let audioSession = AVAudioSession.sharedInstance()
-            switch audioSession.recordPermission {
+            // 1. iOS 17 대응 권한 확인 (AVAudioApplication 사용)
+            let permissionStatus = AVAudioApplication.shared.recordPermission
+            
+            switch permissionStatus {
             case .undetermined:
-                audioSession.requestRecordPermission { [weak self] granted in
+                // 최신 권한 요청 방식
+                AVAudioApplication.requestRecordPermission { [weak self] granted in
                     DispatchQueue.main.async {
                         if granted {
                             self?.startRecording()
@@ -218,6 +221,7 @@ class GeminiLiveService: NSObject {
                 break
             }
 
+            // 2. 오디오 엔진 초기화 및 중복 탭 제거
             if let engine = audioEngine, engine.isRunning {
                 engine.stop()
                 engine.inputNode.removeTap(onBus: 0)
@@ -226,18 +230,21 @@ class GeminiLiveService: NSObject {
             configureAudioSession()
 
             guard let engine = audioEngine else {
-                print("❌ [Gemini] 音频引擎未初始化")
+                print("❌ [Gemini] 오디오 엔진 미초기화")
                 return
             }
 
             let inputNode = engine.inputNode
             let inputFormat = inputNode.outputFormat(forBus: 0)
-            if let recordTargetFormat {
+            
+            // 3. 컨버터 설정
+            if let recordTargetFormat = recordTargetFormat {
                 recordConverter = AVAudioConverter(from: inputFormat, to: recordTargetFormat)
             } else {
                 recordConverter = nil
             }
 
+            // 4. 오디오 탭 설치
             inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
                 self?.processAudioBuffer(buffer, inputFormat: inputFormat)
             }
@@ -246,10 +253,10 @@ class GeminiLiveService: NSObject {
             try engine.start()
 
             isRecording = true
-            print("✅ [Gemini] 录音已启动")
+            print("✅ [Gemini] 녹음 활성화")
 
         } catch {
-            print("❌ [Gemini] 启动录音失败: \(error.localizedDescription)")
+            print("❌ [Gemini] 녹음 시작 실패: \(error.localizedDescription)")
             onError?("Failed to start recording: \(error.localizedDescription)")
         }
     }

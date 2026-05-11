@@ -155,24 +155,35 @@ class StreamSessionViewModel: ObservableObject {
 
   func handleStartStreaming() async {
     logger.info("▶️ handleStartStreaming called")
+
+    // 스트리밍 전 시스템 권한 상태 진단
+    PermissionsManager.shared.dumpDATPermissionDiagnostics()
+
     let permission = Permission.camera
     do {
       let status = try await wearables.checkPermissionStatus(permission)
-      logger.info("▶️ Permission status: \(String(describing: status))")
+      logger.info("▶️ DAT Permission status: \(String(describing: status))")
       if status == .granted {
         await startSession()
         return
       }
       let requestStatus = try await wearables.requestPermission(permission)
-      logger.info("▶️ Permission request result: \(String(describing: requestStatus))")
+      logger.info("▶️ DAT Permission request result: \(String(describing: requestStatus))")
       if requestStatus == .granted {
         await startSession()
         return
       }
+      logger.error("❌ DAT Permission denied (status: \(String(describing: requestStatus)))")
       showError("Permission denied")
     } catch {
-      logger.error("❌ Permission error: \(error.localizedDescription)")
-      showError("Permission error: \(error.description)")
+      let nsError = error as NSError
+      logger.error("❌ DAT PermissionError domain=\(nsError.domain) code=\(nsError.code)")
+      logger.error("❌ localizedDescription: \(nsError.localizedDescription)")
+      logger.error("❌ userInfo: \(nsError.userInfo)")
+      if let underlying = nsError.userInfo[NSUnderlyingErrorKey] as? NSError {
+        logger.error("❌ underlyingError domain=\(underlying.domain) code=\(underlying.code) desc=\(underlying.localizedDescription)")
+      }
+      showError("Permission error [\(nsError.domain) \(nsError.code)]: \(nsError.localizedDescription)")
     }
   }
 

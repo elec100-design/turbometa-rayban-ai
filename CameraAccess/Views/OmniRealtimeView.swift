@@ -54,14 +54,14 @@ struct OmniRealtimeView: View {
                         }
                         .padding()
                     }
-                    .onChange(of: viewModel.conversationHistory.count) { _ in
+                    .onChange(of: viewModel.conversationHistory.count) {
                         if let lastMessage = viewModel.conversationHistory.last {
                             withAnimation {
                                 proxy.scrollTo(lastMessage.id, anchor: .bottom)
                             }
                         }
                     }
-                    .onChange(of: viewModel.currentTranscript) { _ in
+                    .onChange(of: viewModel.currentTranscript) {
                         withAnimation {
                             proxy.scrollTo("current", anchor: .bottom)
                         }
@@ -76,8 +76,10 @@ struct OmniRealtimeView: View {
             viewModel.connect()
             // Update video frames
             Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-                if let frame = streamViewModel.currentVideoFrame {
-                    viewModel.updateVideoFrame(frame)
+                Task { @MainActor in
+                    if let frame = streamViewModel.currentVideoFrame {
+                        viewModel.updateVideoFrame(frame)
+                    }
                 }
             }
         }

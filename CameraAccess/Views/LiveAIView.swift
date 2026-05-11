@@ -69,14 +69,14 @@ struct LiveAIView: View {
                             }
                             .padding()
                         }
-                        .onChange(of: viewModel.conversationHistory.count) { _ in
+                        .onChange(of: viewModel.conversationHistory.count) {
                             if let lastMessage = viewModel.conversationHistory.last {
                                 withAnimation {
                                     proxy.scrollTo(lastMessage.id, anchor: .bottom)
                                 }
                             }
                         }
-                        .onChange(of: viewModel.currentTranscript) { _ in
+                        .onChange(of: viewModel.currentTranscript) {
                             withAnimation {
                                 proxy.scrollTo("current", anchor: .bottom)
                             }
@@ -111,8 +111,10 @@ struct LiveAIView: View {
             // 更新视频帧
             frameTimer?.invalidate()
             frameTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-                if let frame = streamViewModel.currentVideoFrame {
-                    viewModel.updateVideoFrame(frame)
+                Task { @MainActor in
+                    if let frame = streamViewModel.currentVideoFrame {
+                        viewModel.updateVideoFrame(frame)
+                    }
                 }
             }
         }
@@ -128,7 +130,7 @@ struct LiveAIView: View {
                 }
             }
         }
-        .onChange(of: viewModel.isConnected) { isConnected in
+        .onChange(of: viewModel.isConnected) { _, isConnected in
             if isConnected, !viewModel.isRecording {
                 viewModel.startRecording()
             }

@@ -253,7 +253,7 @@ struct SettingsView: View {
                             HStack {
                                 Image(systemName: "key.fill")
                                     .foregroundColor(.orange)
-                                Text("Google API Key")
+                                Text("settings.google.apikey".localized)
                                     .foregroundColor(AppColors.textPrimary)
                                 Spacer()
                                 Text(hasGoogleAPIKey ? "settings.apikey.configured".localized : "settings.apikey.notconfigured".localized)
@@ -348,8 +348,7 @@ struct SettingsView: View {
                     APIKeySettingsView(provider: providerManager.currentProvider)
                 }
             }
-            .onChange(of: showAPIKeySettings) { isShowing in
-                // 当 API Key 设置界面关闭时，刷新状态
+            .onChange(of: showAPIKeySettings) { _, isShowing in
                 if !isShowing {
                     refreshAPIKeyStatus()
                 }
@@ -357,7 +356,7 @@ struct SettingsView: View {
             .sheet(isPresented: $showProviderSettings) {
                 APIProviderSettingsView()
             }
-            .onChange(of: showProviderSettings) { isShowing in
+            .onChange(of: showProviderSettings) { _, isShowing in
                 if !isShowing {
                     refreshAPIKeyStatus()
                 }
@@ -380,8 +379,7 @@ struct SettingsView: View {
             .sheet(isPresented: $showGoogleAPIKeySettings) {
                 GoogleAPIKeySettingsView()
             }
-            .onChange(of: showGoogleAPIKeySettings) { isShowing in
-                // 当 Google API Key 设置界面关闭时，刷新状态
+            .onChange(of: showGoogleAPIKeySettings) { _, isShowing in
                 if !isShowing {
                     refreshAPIKeyStatus()
                 }
@@ -437,10 +435,10 @@ struct SettingsView: View {
 
     private func qualityDisplayName(_ code: String) -> String {
         switch code {
-        case "low": return "低画质"
-        case "medium": return "中画质"
-        case "high": return "高画质"
-        default: return "中画质"
+        case "low": return "settings.quality.low".localized
+        case "medium": return "settings.quality.medium".localized
+        case "high": return "settings.quality.high".localized
+        default: return "settings.quality.medium".localized
         }
     }
 }
@@ -907,16 +905,16 @@ struct LanguageSettingsView: View {
                         }
                     }
                 } header: {
-                    Text("选择输出语言")
+                    Text("settings.language.select".localized)
                 } footer: {
-                    Text("AI 将使用该语言进行语音输出和文字回复")
+                    Text("settings.language.description".localized)
                 }
             }
-            .navigationTitle("输出语言")
+            .navigationTitle("settings.language".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("完成") {
+                    Button("done".localized) {
                         dismiss()
                     }
                 }
@@ -1157,7 +1155,7 @@ struct GoogleAPIKeySettingsView: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                 } header: {
-                    Text("Google Gemini API Key")
+                    Text("settings.google.gemini.apikey".localized)
                 } footer: {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("settings.apikey.google.help".localized)

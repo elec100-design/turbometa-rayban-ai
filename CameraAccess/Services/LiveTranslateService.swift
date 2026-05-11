@@ -233,7 +233,7 @@ class LiveTranslateService: NSObject {
                 try audioSession.setCategory(
                     .playAndRecord,
                     mode: .default,
-                    options: [.allowBluetooth, .defaultToSpeaker]
+                    options: [.allowBluetoothHFP, .defaultToSpeaker]
                 )
                 print("🎙️ [Translate] 使用蓝牙麦克风（翻译自己）")
             }

@@ -6,6 +6,7 @@
 import Foundation
 import UIKit
 import AVFoundation
+import CoreBluetooth
 import Photos
 
 class PermissionsManager: ObservableObject {
@@ -123,6 +124,59 @@ class PermissionsManager: ObservableObject {
 
         @unknown default:
             completion(false)
+        }
+    }
+
+    // MARK: - DAT SDK Permission Diagnostics
+
+    func dumpDATPermissionDiagnostics() {
+        print("========== [DAT Permission Diagnostics] ==========")
+
+        // Bluetooth
+        let btState = CBManager.authorization
+        let btLabel: String
+        switch btState {
+        case .allowedAlways: btLabel = "allowedAlways"
+        case .denied: btLabel = "DENIED"
+        case .restricted: btLabel = "RESTRICTED"
+        case .notDetermined: btLabel = "notDetermined"
+        @unknown default: btLabel = "unknown(\(btState.rawValue))"
+        }
+        print("  Bluetooth (CBManager): \(btLabel)")
+
+        // Camera
+        let camStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        print("  Camera (AVCaptureDevice.video): \(camStatus.rawValue) [\(Self.avAuthLabel(camStatus))]")
+
+        // Microphone
+        let micStatus = AVCaptureDevice.authorizationStatus(for: .audio)
+        print("  Microphone (AVCaptureDevice.audio): \(micStatus.rawValue) [\(Self.avAuthLabel(micStatus))]")
+
+        // Local Network — no runtime API; check Info.plist key presence
+        let hasLocalNetworkKey = Bundle.main.object(forInfoDictionaryKey: "NSLocalNetworkUsageDescription") != nil
+        let hasBonjourKey = Bundle.main.object(forInfoDictionaryKey: "_LSBonjourServices") != nil  // legacy key
+        print("  Local Network: Info.plist NSLocalNetworkUsageDescription=\(hasLocalNetworkKey), BonjourServices=\(hasBonjourKey)")
+
+        // Info.plist DAT keys
+        let hasBTKey = Bundle.main.object(forInfoDictionaryKey: "NSBluetoothAlwaysUsageDescription") != nil
+        let hasMicKey = Bundle.main.object(forInfoDictionaryKey: "NSMicrophoneUsageDescription") != nil
+        let hasCamKey = Bundle.main.object(forInfoDictionaryKey: "NSCameraUsageDescription") != nil
+        print("  Info.plist keys: BT=\(hasBTKey) Mic=\(hasMicKey) Cam=\(hasCamKey)")
+
+        // Background modes
+        let bgModes = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? [String] ?? []
+        print("  Background modes: \(bgModes)")
+
+        print("===================================================")
+    }
+
+    private static func avAuthLabel(_ status: AVAuthorizationStatus) -> String {
+        switch status {
+        case .authorized: return "authorized"
+        case .denied: return "DENIED"
+        case .restricted: return "RESTRICTED"
+        case .notDetermined: return "notDetermined"
+        @unknown default: return "unknown"
         }
     }
 

@@ -83,11 +83,13 @@ struct CameraSnapParams {
     let maxWidth: Int
     let quality: Double
     let format: String
+    let analyze: Bool
 
     init(from dict: [String: Any]?) {
         self.maxWidth = dict?["maxWidth"] as? Int ?? 1600
         self.quality = dict?["quality"] as? Double ?? 0.8
         self.format = dict?["format"] as? String ?? "jpg"
+        self.analyze = dict?["analyze"] as? Bool ?? false
     }
 }
 

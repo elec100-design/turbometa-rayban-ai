@@ -2,6 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+		<string>_tcp</string>
+	</array>
+	<key>NSHumanReadableCopyright</key>
+	<string></string>
+	<key>LSApplicationCategoryType</key>
+	<string></string>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -42,23 +53,25 @@
 		<key>AppLinkURLScheme</key>
 		<string>turbometa://</string>
 		<key>ClientToken</key>
-		<string>$(CLIENT_TOKEN)</string>
+		<string>R|1724381358589280|636d51f466723d7b4818a579372cdcea</string>
 		<key>MetaAppID</key>
-		<string>$(META_APP_ID)</string>
+		<string>1724381358589280</string>
 		<key>TeamID</key>
-		<string>$(DEVELOPMENT_TEAM)</string>
+		<string>9SV9B5F9RQ</string>
 	</dict>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsLocalNetworking</key>
+		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Needed to connect to Meta AI Glasses</string>
+	<string>레이벤 메타 안경과의 통신을 위해 블루투스 권한이 필요합니다.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>OpenClaw 게이트웨이 연결 및 안경 통신을 위해 로컬 네트워크 권한이 필요합니다.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>TurboMeta 需要访问麦克风以实现与智能眼镜的实时语音对话功能。</string>
+	<string>TurboMeta는 스마트 글래스와의 실시간 음성 대화 기능을 구현하기 위해 마이크에 접속해야 합니다.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>TurboMeta 需要访问相册以保存从智能眼镜拍摄的照片。</string>
+	<string>TurboMeta의 포토갤러리 사용권한을 부여하세요.</string>
 	<key>NSSiriUsageDescription</key>
 	<string>TurboMeta 需要 Siri 权限以支持语音快捷指令触发快速识图功能。</string>
 	<key>UIApplicationSceneManifest</key>
