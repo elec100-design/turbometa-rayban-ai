@@ -21,7 +21,7 @@ struct MainAppView: View {
   let wearables: WearablesInterface
   @ObservedObject private var viewModel: WearablesViewModel
   @StateObject private var streamViewModel: StreamSessionViewModel
-  @StateObject private var quickVisionManager = QuickVisionManager.shared
+  @State private var quickVisionManager = QuickVisionManager.shared
   @State private var permissionsGranted = false
   @State private var hasCheckedPermissions = false
 

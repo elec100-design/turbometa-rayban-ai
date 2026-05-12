@@ -24,7 +24,7 @@ struct SettingsView: View {
     @State private var showLiveAISettings = false
     @State private var showLiveTranslateSettings = false
     @State private var showOpenClawSettings = false
-    @ObservedObject var quickVisionModeManager = QuickVisionModeManager.shared
+    @Bindable var quickVisionModeManager = QuickVisionModeManager.shared
     @ObservedObject var liveAIModeManager = LiveAIModeManager.shared
     @State private var selectedModel = "qwen3-omni-flash-realtime"
     @State private var selectedLanguage = "zh-CN" // 默认中文

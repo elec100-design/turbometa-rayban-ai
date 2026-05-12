@@ -281,7 +281,7 @@ class LiveTranslateService: NSObject {
     }
 
     private func processAudioBuffer(_ buffer: AVAudioPCMBuffer) {
-        guard let floatChannelData = buffer.floatChannelData else { return }
+        guard buffer.floatChannelData != nil else { return }
 
         let inputSampleRate = buffer.format.sampleRate
 

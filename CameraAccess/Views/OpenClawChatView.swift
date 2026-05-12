@@ -1,9 +1,3 @@
-/*
- * OpenClaw Chat View
- * 与 OpenClaw AI 聊天
- * 支持: 语音转录、眼镜拍照、文字输入
- */
-
 import SwiftUI
 
 struct OpenClawChatMessage: Identifiable {
@@ -23,14 +17,19 @@ struct OpenClawChatView: View {
     @State private var messages: [OpenClawChatMessage] = []
     @State private var inputText = ""
     @State private var pendingResponse = ""
-    @State private var isSending = false
 
-    // ASR states
+    // Navigation
+    @State private var showNavInput = false
+    @State private var navDestination = ""
+
+    // History
+    @State private var showHistorySheet = false
+
+    // ASR
     @State private var isListening = false
-    @State private var asrText = ""           // accumulated final sentences
-    @State private var asrPartial = ""        // current partial
+    @State private var asrText = ""
+    @State private var asrPartial = ""
     @State private var asrService: OpenClawASRService?
-    @State private var showTextInput = false  // toggle between voice/text mode
 
     init(streamViewModel: StreamSessionViewModel) {
         self.streamViewModel = streamViewModel
@@ -40,255 +39,248 @@ struct OpenClawChatView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Connection status
-                if openClawService.connectionState != .connected {
-                    HStack(spacing: 8) {
-                        ProgressView().scaleEffect(0.8)
-                        Text("openclaw.status.connecting".localized)
-                            .font(.system(size: 13))
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(Color.orange.opacity(0.15))
-                }
-
-                // Messages list
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 12) {
-                            ForEach(messages) { msg in
-                                ChatBubble(message: msg).id(msg.id)
-                            }
-                            if !pendingResponse.isEmpty {
-                                ChatBubble(message: OpenClawChatMessage(
-                                    role: "assistant", text: pendingResponse, image: nil
-                                ))
-                            }
-                        }
-                        .padding()
-                    }
-                    .onChange(of: messages.count) {
-                        if let last = messages.last {
-                            withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
-                        }
-                    }
-                }
-
+                connectionBanner
+                messagesList
                 Divider()
-
-                // Bottom control area
-                VStack(spacing: 12) {
-                    // ASR transcription preview (when listening or has text to send)
-                    if isListening || !asrText.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            // Transcribed text
-                            Text(displayASRText)
-                                .font(.system(size: 15))
-                                .foregroundColor(.primary)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(12)
-                                .background(Color(.systemGray6))
-                                .cornerRadius(12)
-
-                            // Send / Cancel buttons after stopping
-                            if !isListening && !asrText.isEmpty {
-                                HStack(spacing: 12) {
-                                    Button {
-                                        asrText = ""
-                                        asrPartial = ""
-                                    } label: {
-                                        Text("cancel".localized)
-                                            .font(.system(size: 15, weight: .medium))
-                                            .foregroundColor(.gray)
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, 12)
-                                            .background(Color(.systemGray5))
-                                            .cornerRadius(10)
-                                    }
-
-                                    Button {
-                                        sendASRText()
-                                    } label: {
-                                        Text("openclaw.chat.sendvoice".localized)
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundColor(.white)
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, 12)
-                                            .background(Color.purple)
-                                            .cornerRadius(10)
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                    }
-
-                    // Visual AI status
-                    if visualAI.isProcessing || !visualAI.statusMessage.isEmpty {
-                        HStack(spacing: 8) {
-                            if visualAI.isProcessing {
-                                ProgressView().scaleEffect(0.8)
-                            }
-                            Text(visualAI.statusMessage)
-                                .font(.system(size: 13))
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 16)
-                    }
-
-                    // Visual AI result
-                    if !visualAI.lastAnalysisResult.isEmpty && !visualAI.isProcessing {
-                        Text(visualAI.lastAnalysisResult)
-                            .font(.system(size: 14))
-                            .foregroundColor(.primary)
-                            .padding(12)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(12)
-                            .padding(.horizontal, 16)
-                    }
-
-                    // Main action buttons
-                    HStack(spacing: 16) {
-                        // Camera snap
-                        Button {
-                            Task { await snapAndSend() }
-                        } label: {
-                            VStack(spacing: 4) {
-                                Image(systemName: "camera.fill")
-                                    .font(.system(size: 22))
-                                Text("openclaw.chat.snap".localized)
-                                    .font(.system(size: 10))
-                            }
-                            .foregroundColor(isSending ? .gray : .purple)
-                            .frame(width: 60, height: 60)
-                        }
-                        .disabled(isSending || openClawService.connectionState != .connected)
-
-                        // Big mic button
-                        Button {
-                            toggleListening()
-                        } label: {
-                            ZStack {
-                                Circle()
-                                    .fill(
-                                        isListening
-                                            ? LinearGradient(colors: [.red, .orange], startPoint: .top, endPoint: .bottom)
-                                            : LinearGradient(colors: [.purple, .indigo], startPoint: .top, endPoint: .bottom)
-                                    )
-                                    .frame(width: 72, height: 72)
-                                    .shadow(color: isListening ? .red.opacity(0.4) : .purple.opacity(0.3), radius: 10)
-
-                                if isListening {
-                                    // Pulsing animation
-                                    Circle()
-                                        .stroke(Color.red.opacity(0.3), lineWidth: 3)
-                                        .frame(width: 88, height: 88)
-                                        .scaleEffect(isListening ? 1.1 : 1.0)
-                                        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: isListening)
-                                }
-
-                                Image(systemName: isListening ? "stop.fill" : "mic.fill")
-                                    .font(.system(size: isListening ? 24 : 28))
-                                    .foregroundColor(.white)
-                            }
-                        }
-                        .disabled(openClawService.connectionState != .connected)
-
-                        // Text input toggle
-                        Button {
-                            showTextInput.toggle()
-                        } label: {
-                            VStack(spacing: 4) {
-                                Image(systemName: "keyboard")
-                                    .font(.system(size: 22))
-                                Text("openclaw.chat.text".localized)
-                                    .font(.system(size: 10))
-                            }
-                            .foregroundColor(.purple)
-                            .frame(width: 60, height: 60)
-                        }
-
-                        // Visual AI (앱 주도 촬영+분석)
-                        Button {
-                            Task { await visualAI.startVisualAISession() }
-                        } label: {
-                            VStack(spacing: 4) {
-                                Image(systemName: "eye.fill")
-                                    .font(.system(size: 22))
-                                Text("Visual AI")
-                                    .font(.system(size: 10))
-                            }
-                            .foregroundColor(visualAI.isProcessing ? .gray : .orange)
-                            .frame(width: 60, height: 60)
-                        }
-                        .disabled(visualAI.isProcessing)
-                    }
-                    .padding(.vertical, 4)
-
-                    // Text input bar (toggleable)
-                    if showTextInput {
-                        HStack(spacing: 10) {
-                            TextField("openclaw.chat.placeholder".localized, text: $inputText)
-                                .textFieldStyle(.roundedBorder)
-                                .submitLabel(.send)
-                                .onSubmit { sendText() }
-
-                            Button {
-                                sendText()
-                            } label: {
-                                Image(systemName: "arrow.up.circle.fill")
-                                    .font(.system(size: 30))
-                                    .foregroundColor(inputText.isEmpty ? .gray : .purple)
-                            }
-                            .disabled(inputText.isEmpty || openClawService.connectionState != .connected)
-                        }
-                        .padding(.horizontal, 16)
-                    }
-                }
-                .padding(.vertical, 10)
-                .background(Color(.systemBackground))
+                bottomControls
             }
-            .navigationTitle("OpenClaw")
+            .navigationTitle("터보메타")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark")
-                    }
+                    Button { dismiss() } label: { Image(systemName: "xmark") }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 10) {
+                        Button { startNewConversation() } label: {
+                            Image(systemName: "square.and.pencil")
+                                .font(.system(size: 14))
+                        }
                         Circle()
                             .fill(openClawService.connectionState == .connected ? Color.green : Color.gray)
                             .frame(width: 8, height: 8)
-                        NavigationLink {
-                            OpenClawSettingsView()
-                        } label: {
-                            Image(systemName: "gear")
-                                .font(.system(size: 14))
+                        NavigationLink { OpenClawSettingsView() } label: {
+                            Image(systemName: "gear").font(.system(size: 14))
                         }
                     }
                 }
             }
         }
-        .onAppear {
-            setupChatEventHandler()
-            if openClawService.connectionState != .connected,
-               openClawService.loadGatewayToken() != nil {
-                openClawService.connect()
+        .onAppear { setupHandlers() }
+        .onDisappear { cleanup() }
+        .sheet(isPresented: $showHistorySheet) {
+            ChatHistoryView { loadedMessages in
+                saveCurrentSession()
+                messages = loadedMessages
             }
         }
-        .onDisappear {
-            stopListening()
-            if !pendingResponse.isEmpty {
-                messages.append(OpenClawChatMessage(role: "assistant", text: pendingResponse, image: nil))
-                pendingResponse = ""
+    }
+
+    // MARK: - Sub-views
+
+    @ViewBuilder
+    private var connectionBanner: some View {
+        if openClawService.connectionState != .connected {
+            HStack(spacing: 8) {
+                ProgressView().scaleEffect(0.8)
+                Text("openclaw.status.connecting".localized).font(.system(size: 13))
             }
-            openClawService.onChatEvent = nil
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(Color.orange.opacity(0.15))
         }
+    }
+
+    private var messagesList: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 12) {
+                    ForEach(messages) { msg in
+                        ChatBubble(message: msg).id(msg.id)
+                    }
+                    if !pendingResponse.isEmpty {
+                        ChatBubble(message: OpenClawChatMessage(role: "assistant", text: pendingResponse, image: nil))
+                    }
+                }
+                .padding()
+            }
+            .onChange(of: messages.count) {
+                if let last = messages.last {
+                    withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
+                }
+            }
+        }
+    }
+
+    private var bottomControls: some View {
+        VStack(spacing: 10) {
+            // Processing status
+            if visualAI.isProcessing {
+                HStack(spacing: 8) {
+                    ProgressView().scaleEffect(0.8)
+                    Text(visualAI.statusMessage).font(.system(size: 13)).foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 4)
+            }
+
+            // ASR transcript preview
+            if isListening || !asrText.isEmpty {
+                asrPreviewArea
+            }
+
+            // Navigation destination input
+            if showNavInput {
+                navInputArea
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+
+            // 하단 메뉴: 촬영 - 마이크 - 길찾기 - 대화기록
+            HStack {
+                Spacer()
+
+                // 1. 촬영 분석
+                Button {
+                    Task { await triggerSceneDescription() }
+                } label: {
+                    VStack(spacing: 6) {
+                        Image(systemName: "camera.fill").font(.system(size: 28))
+                        Text("촬영 분석").font(.caption2)
+                    }
+                    .foregroundColor(visualAI.isProcessing ? .gray : .white)
+                }
+                .disabled(visualAI.isProcessing)
+
+                Spacer()
+
+                // 2. 큰 마이크 (음성 대화)
+                Button { toggleListening() } label: {
+                    Image(systemName: isListening ? "stop.circle.fill" : "mic.circle.fill")
+                        .font(.system(size: 52))
+                        .foregroundColor(isListening ? .red : .blue)
+                        .shadow(radius: 5)
+                }
+
+                Spacer()
+
+                // 3. 길찾기 네비게이션
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showNavInput.toggle()
+                        if !showNavInput { navDestination = "" }
+                    }
+                } label: {
+                    VStack(spacing: 6) {
+                        Image(systemName: "location.north.circle.fill").font(.system(size: 28))
+                        Text("길찾기").font(.caption2)
+                    }
+                    .foregroundColor(showNavInput ? .yellow : .white)
+                }
+
+                Spacer()
+
+                // 4. 대화 기록
+                Button {
+                    showHistorySheet = true
+                } label: {
+                    VStack(spacing: 6) {
+                        Image(systemName: "clock.arrow.circlepath").font(.system(size: 28))
+                        Text("대화 기록").font(.caption2)
+                    }
+                    .foregroundColor(.white)
+                }
+
+                Spacer()
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(Color.black.opacity(0.85))
+            .cornerRadius(16)
+
+            // Text input (always visible for text chat)
+            HStack(spacing: 10) {
+                TextField("터보메타에게 말하기...", text: $inputText)
+                    .textFieldStyle(.roundedBorder)
+                    .submitLabel(.send)
+                    .onSubmit { sendText() }
+
+                Button { sendText() } label: {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.system(size: 30))
+                        .foregroundColor(inputText.isEmpty ? .gray : .purple)
+                }
+                .disabled(inputText.isEmpty || openClawService.connectionState != .connected)
+            }
+            .padding(.horizontal, 16)
+        }
+        .padding(.vertical, 10)
+        .background(Color(.systemBackground))
+    }
+
+    private var asrPreviewArea: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(displayASRText)
+                .font(.system(size: 15))
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(12)
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+
+            if !isListening && !asrText.isEmpty {
+                HStack(spacing: 12) {
+                    Button {
+                        asrText = ""
+                        asrPartial = ""
+                    } label: {
+                        Text("cancel".localized)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color(.systemGray5))
+                            .cornerRadius(10)
+                    }
+
+                    Button { sendASRText() } label: {
+                        Text("openclaw.chat.sendvoice".localized)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.purple)
+                            .cornerRadius(10)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+    }
+
+    private var navInputArea: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "mappin.circle.fill")
+                .foregroundColor(.blue)
+                .font(.system(size: 20))
+
+            TextField("목적지를 입력하세요...", text: $navDestination)
+                .textFieldStyle(.roundedBorder)
+                .submitLabel(.go)
+                .onSubmit { startNavigation() }
+
+            Button { startNavigation() } label: {
+                Text("시작")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(navDestination.isEmpty ? Color.gray : Color.blue)
+                    .cornerRadius(8)
+            }
+            .disabled(navDestination.isEmpty)
+        }
+        .padding(.horizontal, 16)
     }
 
     // MARK: - Computed
@@ -300,9 +292,9 @@ struct OpenClawChatView: View {
         return asrText + (asrPartial.isEmpty ? "" : asrPartial)
     }
 
-    // MARK: - Chat Events
+    // MARK: - Setup
 
-    private func setupChatEventHandler() {
+    private func setupHandlers() {
         openClawService.onChatEvent = { (text: String) in
             if text.hasPrefix("[[FINAL]]") {
                 let fullText = String(text.dropFirst(9))
@@ -314,9 +306,62 @@ struct OpenClawChatView: View {
                 pendingResponse = text
             }
         }
+        visualAI.onDescribeResult = { result in
+            messages.append(OpenClawChatMessage(role: "assistant", text: result, image: nil))
+        }
+        if openClawService.connectionState != .connected,
+           openClawService.loadGatewayToken() != nil {
+            openClawService.connect()
+        }
     }
 
-    // MARK: - Text
+    private func cleanup() {
+        stopListening()
+        if !pendingResponse.isEmpty {
+            messages.append(OpenClawChatMessage(role: "assistant", text: pendingResponse, image: nil))
+            pendingResponse = ""
+        }
+        saveCurrentSession()
+        openClawService.onChatEvent = nil
+        visualAI.onDescribeResult = nil
+    }
+
+    private func saveCurrentSession() {
+        OpenClawSessionStorage.shared.saveSession(messages: messages)
+    }
+
+    private func startNewConversation() {
+        saveCurrentSession()
+        messages = []
+        pendingResponse = ""
+    }
+
+    // MARK: - Actions
+
+    private func triggerSceneDescription() async {
+        messages.append(OpenClawChatMessage(role: "user", text: "📷 지금 보는 거 설명해줘", image: nil))
+        flushPendingResponse()
+        await visualAI.captureAndDescribe()
+    }
+
+    private func triggerTranslate() async {
+        messages.append(OpenClawChatMessage(role: "user", text: "🌐 보이는 텍스트 번역해줘", image: nil))
+        flushPendingResponse()
+        await visualAI.captureAndTranslate()
+    }
+
+    private func startNavigation() {
+        let dest = navDestination.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !dest.isEmpty else { return }
+        messages.append(OpenClawChatMessage(role: "user", text: "🗺️ \(dest) 로 안내해줘", image: nil))
+        flushPendingResponse()
+        withAnimation { showNavInput = false }
+        navDestination = ""
+        Task {
+            await GoogleMapsNavigator.shared.startVoiceNavigation(destination: dest)
+            messages.append(OpenClawChatMessage(role: "assistant", text: "✅ \(dest) 네비게이션을 시작합니다.", image: nil))
+        }
+    }
 
     private func sendText() {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -327,48 +372,13 @@ struct OpenClawChatView: View {
         openClawService.sendChatMessage(text)
     }
 
-    // MARK: - Camera
-
-    private func snapAndSend() async {
-        isSending = true
-        defer { isSending = false }
-
-        let needsStreamStop = !streamViewModel.isStreaming
-        if needsStreamStop {
-            await streamViewModel.handleStartStreaming()
-            let deadline = Date().addingTimeInterval(5.0)
-            while streamViewModel.currentVideoFrame == nil && Date() < deadline {
-                try? await Task.sleep(nanoseconds: 200_000_000)
-            }
-        }
-
-        guard let frame = streamViewModel.currentVideoFrame else {
-            messages.append(OpenClawChatMessage(role: "assistant", text: "openclaw.chat.noframe".localized, image: nil))
-            if needsStreamStop { await streamViewModel.stopSession() }
-            return
-        }
-
-        let text = inputText.isEmpty ? "openclaw.chat.photoprompt".localized : inputText
-        messages.append(OpenClawChatMessage(role: "user", text: text, image: frame))
-        flushPendingResponse()
-        inputText = ""
-        openClawService.sendChatMessage(text, image: frame)
-
-        if needsStreamStop { await streamViewModel.stopSession() }
-    }
-
     // MARK: - Voice (ASR)
 
     private func toggleListening() {
-        if isListening {
-            stopListening()
-        } else {
-            startListening()
-        }
+        if isListening { stopListening() } else { startListening() }
     }
 
     private func startListening() {
-        // 1. .openrouter로 수정
         guard let apiKey = APIKeyManager.shared.getAPIKey(for: .openrouter), !apiKey.isEmpty else {
             let errorMsg = NSLocalizedString("livetranslate.error.noApiKey", comment: "")
             messages.append(OpenClawChatMessage(role: "assistant", text: errorMsg, image: nil))
@@ -377,15 +387,12 @@ struct OpenClawChatView: View {
 
         asrText = ""
         asrPartial = ""
-        
+
         let service = OpenClawASRService(apiKey: apiKey)
         self.asrService = service
 
-        // 구조체(struct)에서는 [weak self] 대신 self를 직접 사용합니다.
         service.onPartialResult = { (text: String) in
-            DispatchQueue.main.async {
-                self.asrPartial = text
-            }
+            DispatchQueue.main.async { self.asrPartial = text }
         }
 
         service.onFinalResult = { (text: String) in
@@ -395,7 +402,6 @@ struct OpenClawChatView: View {
             }
         }
 
-        // onError는 (String) 타입을 받을 확률이 높습니다. String으로 수정했습니다.
         service.onError = { (error: String) in
             DispatchQueue.main.async {
                 self.isListening = false
@@ -406,12 +412,12 @@ struct OpenClawChatView: View {
         service.start()
         isListening = true
     }
+
     private func stopListening() {
         asrService?.stop()
         asrService = nil
         isListening = false
         asrPartial = ""
-        // Keep asrText for user to review & send
     }
 
     private func sendASRText() {

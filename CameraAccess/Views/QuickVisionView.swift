@@ -7,7 +7,7 @@ import SwiftUI
 
 struct QuickVisionView: View {
     @ObservedObject var streamViewModel: StreamSessionViewModel
-    @StateObject private var quickVisionManager = QuickVisionManager.shared
+    @State private var quickVisionManager = QuickVisionManager.shared
     @StateObject private var tts = TTSService.shared
     let apiKey: String
 

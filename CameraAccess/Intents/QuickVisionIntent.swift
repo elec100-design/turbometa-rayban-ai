@@ -4,6 +4,7 @@
  */
 
 import AppIntents
+import Observation
 import UIKit
 import SwiftUI
 
@@ -139,9 +140,9 @@ struct TurboMetaShortcuts: AppShortcutsProvider {
         AppShortcut(
                     intent: QuickVisionCustomIntent(),
                     phrases: [
-                        "터보메타에게 시키기",       // 👈 앱 이름 변수를 빼고 한글로 쾅 박아버립니다.
-                        "터보메타 맞춤 지시",
-                        "터보메타에게 물어보기"
+                        "\(.applicationName)에게 시키기",
+                        "\(.applicationName) 맞춤 지시",
+                        "\(.applicationName)에게 물어보기"
                     ],
                     shortTitle: "터보 맞춤 지시",
                     systemImageName: "mic.and.signal.meter"
@@ -170,14 +171,15 @@ extension Notification.Name {
 // MARK: - 5. 핵심 엔진: QuickVisionManager (이 부분이 없어서 에러가 났었습니다)
 
 @MainActor
-class QuickVisionManager: ObservableObject {
+@Observable
+final class QuickVisionManager {
     static let shared = QuickVisionManager()
 
-    @Published var isProcessing = false
-    @Published var lastResult: String?
-    @Published var errorMessage: String?
-    @Published var lastImage: UIImage?
-    @Published var lastMode: QuickVisionMode = .standard
+    var isProcessing = false
+    var lastResult: String?
+    var errorMessage: String?
+    var lastImage: UIImage?
+    var lastMode: QuickVisionMode = .standard
 
     private(set) var streamViewModel: StreamSessionViewModel?
     private let tts = TTSService.shared
@@ -265,5 +267,65 @@ class QuickVisionManager: ObservableObject {
         }
 
         isProcessing = false
+    }
+
+    func stopStream() async {
+        guard let streamViewModel = streamViewModel else { return }
+        await streamViewModel.stopSession()
+    }
+
+    func performQuickVision() async {
+        await performQuickVisionWithMode(.standard)
+    }
+
+    func triggerQuickVision() {
+        Task { @MainActor in
+            await performQuickVision()
+        }
+    }
+
+    func sendCustomCommand(text: String) async {
+        print("🔥 [TurboMeta] 자연어 명령 수신: \(text)")
+
+        if let chatVM = OpenClawChatViewModel.shared {
+            await chatVM.processNaturalCommand(text: text)
+            lastResult = chatVM.lastAnalysisResult
+        } else {
+            await performQuickVisionWithMode(.standard, customPrompt: text)
+        }
+    }
+}
+
+// MARK: - 기능 확장
+
+extension QuickVisionManager {
+    /// 터보 번역 전용: 촬영 → 번역 프롬프트로 AI 호출
+    func captureAndTranslate() async -> (translatedText: String?, error: String?) {
+        await performQuickVisionWithMode(.translate)
+        return (lastResult, errorMessage)
+    }
+
+    func checkGlassesConnection() -> Bool {
+        let isConnected = streamViewModel?.hasActiveDevice == true
+        if !isConnected {
+            print("❌ [TurboMeta] 안경이 연결되어 있지 않습니다. Meta View 앱에서 먼저 연결해주세요.")
+        }
+        return isConnected
+    }
+
+    /// 3가지 모드로 현재 시야를 분석: describe(설명) / translate(번역) / navigation(길안내)
+    func sendCurrentViewToOpenClaw(mode: String = "describe") async {
+        switch mode {
+        case "translate":
+            QuickVisionModeManager.shared.setMode(.translate)
+            await performQuickVisionWithMode(.translate)
+
+        case "navigation":
+            tts.speak("목적지를 말씀해 주세요.")
+
+        default: // describe
+            let prompt = "내가 지금 레이반 메타 안경으로 보고 있는 장면이야. 사진 속 텍스트(메뉴판, 간판, 표지판 등)가 있으면 우선적으로 읽고 한국어로 번역해줘. 텍스트가 없으면 장면 전체를 한국어로 자세하고 자연스럽게 설명해줘."
+            await performQuickVisionWithMode(.standard, customPrompt: prompt)
+        }
     }
 }

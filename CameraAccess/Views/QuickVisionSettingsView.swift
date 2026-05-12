@@ -6,7 +6,7 @@
 import SwiftUI
 
 struct QuickVisionSettingsView: View {
-    @ObservedObject var modeManager = QuickVisionModeManager.shared
+    @Bindable var modeManager = QuickVisionModeManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var showHistory = false
 

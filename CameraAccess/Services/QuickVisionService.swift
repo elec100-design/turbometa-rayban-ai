@@ -98,7 +98,7 @@ class QuickVisionService {
         let dataURL = "data:image/jpeg;base64,\(base64String)"
 
         // 使用自定义提示词、模式管理器的提示词、或默认提示词
-        let prompt = customPrompt ?? QuickVisionModeManager.staticPrompt
+        let prompt = customPrompt ?? QuickVisionModeManager.shared.getPrompt()
 
         // Create API request
         let request = ChatCompletionRequest(

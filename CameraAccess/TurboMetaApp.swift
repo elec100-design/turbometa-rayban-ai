@@ -15,6 +15,7 @@
 // of DAT SDK integration including device registration, permissions, and media streaming.
 //
 
+import AppIntents
 import Foundation
 import MWDATCore
 import SwiftUI
@@ -39,6 +40,7 @@ struct TurboMetaApp: App {
     } catch {
       print("❌ [TurboMeta] Wearables.configure() failed: \(error) | \(error.localizedDescription)")
     }
+    TurboMetaShortcuts.updateAppShortcutParameters()
     let wearables = Wearables.shared
     self.wearables = wearables
     self._wearablesViewModel = StateObject(wrappedValue: WearablesViewModel(wearables: wearables))

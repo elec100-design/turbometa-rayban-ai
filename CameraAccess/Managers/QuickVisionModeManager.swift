@@ -4,84 +4,73 @@
  */
 
 import Foundation
+import Observation
 import SwiftUI
 
-class QuickVisionModeManager: ObservableObject {
+@Observable
+final class QuickVisionModeManager {
     static let shared = QuickVisionModeManager()
-
+    
     private let userDefaults = UserDefaults.standard
     private let modeKey = "quickVisionMode"
     private let customPromptKey = "quickVisionCustomPrompt"
     private let translateTargetLanguageKey = "quickVisionTranslateTargetLanguage"
-
-    @Published var currentMode: QuickVisionMode {
+    
+    var currentMode: QuickVisionMode = .standard {
         didSet {
             userDefaults.set(currentMode.rawValue, forKey: modeKey)
-            print("📋 [QuickVisionModeManager] 模式已切换: \(currentMode.displayName)")
+            print("📋 [QuickVisionModeManager] 모드 변경: \(currentMode.displayName)")
         }
     }
-
-    @Published var customPrompt: String {
+    
+    var customPrompt: String = "" {
         didSet {
             userDefaults.set(customPrompt, forKey: customPromptKey)
         }
     }
-
-    @Published var translateTargetLanguage: String {
+    
+    var translateTargetLanguage: String = "ko-KR" {
         didSet {
             userDefaults.set(translateTargetLanguage, forKey: translateTargetLanguageKey)
         }
     }
-
-    // 支持的翻译目标语言
+    
+    // 지원 언어
     static let supportedLanguages: [(code: String, name: String)] = [
-        ("zh-CN", "中文"),
-        ("en-US", "English"),
-        ("ja-JP", "日本語"),
         ("ko-KR", "한국어"),
-        ("fr-FR", "Français"),
-        ("de-DE", "Deutsch"),
-        ("es-ES", "Español"),
-        ("it-IT", "Italiano"),
-        ("pt-BR", "Português"),
-        ("ru-RU", "Русский")
+        ("en-US", "영어"),
+        ("ja-JP", "일본어"),
+        ("zh-CN", "중국어"),
+        ("fr-FR", "프랑스어"),
+        ("de-DE", "독일어"),
+        ("es-ES", "스페인어"),
+        ("it-IT", "이탈리아어"),
+        ("pt-BR", "포르투갈어"),
+        ("ru-RU", "러시아어")
     ]
-
+    
     private init() {
-        // 加载保存的模式
+        // 저장된 모드 불러오기
         if let savedMode = userDefaults.string(forKey: modeKey),
            let mode = QuickVisionMode(rawValue: savedMode) {
             self.currentMode = mode
         } else {
             self.currentMode = .standard
         }
-
-        // 加载自定义提示词
-        self.customPrompt = userDefaults.string(forKey: customPromptKey) ?? "quickvision.custom.default".localized
-
-        // 加载翻译目标语言（默认跟随系统语言）
-        if let savedLanguage = userDefaults.string(forKey: translateTargetLanguageKey) {
-            self.translateTargetLanguage = savedLanguage
-        } else {
-            self.translateTargetLanguage = LanguageManager.staticApiLanguageCode
-        }
+        
+        // 커스텀 프롬프트 불러오기
+        self.customPrompt = userDefaults.string(forKey: customPromptKey) ?? "이미지를 자세히 분석해 주세요."
+        
+        // 번역 대상 언어 (기본 한국어)
+        self.translateTargetLanguage = userDefaults.string(forKey: translateTargetLanguageKey) ?? "ko-KR"
     }
-
-    // MARK: - Get Current Prompt
-
-    /// 获取当前模式的完整提示词
+    
+    // 현재 모드의 프롬프트 반환
     func getPrompt() -> String {
-        switch currentMode {
-        case .custom:
-            return customPrompt
-        case .translate:
-            return getTranslatePrompt()
-        default:
-            return currentMode.prompt
-        }
+        return getPrompt(for: currentMode)
     }
 
-    /// 获取指定模式的提示词
+    // 특정 모드의 프롬프트 반환
     func getPrompt(for mode: QuickVisionMode) -> String {
         switch mode {
         case .custom:
@@ -92,35 +81,22 @@ class QuickVisionModeManager: ObservableObject {
             return mode.prompt
         }
     }
-
-    /// 获取翻译模式的提示词（包含目标语言）
+    
     private func getTranslatePrompt() -> String {
-        let targetLanguageName = Self.supportedLanguages.first { $0.code == translateTargetLanguage }?.name ?? "中文"
-        let basePrompt = "prompt.quickvision.translate".localized
-        return basePrompt.replacingOccurrences(of: "{LANGUAGE}", with: targetLanguageName)
+        let targetName = Self.supportedLanguages.first { $0.code == translateTargetLanguage }?.name ?? "한국어"
+        return """
+        너는 Ray-Ban Meta 안경의 번역 전문 AI 비서다.
+        이미지에 보이는 모든 텍스트를 즉시 \(targetName)로 자연스럽게 번역하라.
+        원문과 번역문을 함께 표시하고, 변명·설명·사과·"이미지가 잘 안보인다" 같은 말은 절대 하지 마라.
+        오직 번역 결과만 출력하라.
+        """
     }
-
-    // MARK: - Mode Management
-
+    
     func setMode(_ mode: QuickVisionMode) {
         currentMode = mode
     }
-
-    func setCustomPrompt(_ prompt: String) {
-        customPrompt = prompt
-    }
-
+    
     func setTranslateTargetLanguage(_ languageCode: String) {
         translateTargetLanguage = languageCode
-    }
-
-    // MARK: - Static Access (for non-SwiftUI contexts)
-
-    static var staticCurrentMode: QuickVisionMode {
-        return shared.currentMode
-    }
-
-    static var staticPrompt: String {
-        return shared.getPrompt()
     }
 }

@@ -6,6 +6,7 @@
 
 import Foundation
 import UIKit
+import CoreLocation
 
 @MainActor
 class OpenClawChatViewModel: ObservableObject {
@@ -16,6 +17,8 @@ class OpenClawChatViewModel: ObservableObject {
     @Published var isProcessing = false
     @Published var statusMessage = ""
     @Published var lastAnalysisResult = ""
+
+    var onDescribeResult: ((String) -> Void)?
 
     private let service = OpenClawNodeService.shared
     private weak var streamViewModel: StreamSessionViewModel?
@@ -74,7 +77,12 @@ class OpenClawChatViewModel: ObservableObject {
         // ── Step 4: Gemini Vision API 호출 ──
         statusMessage = "AI 분석 중..."
         let visionService = QuickVisionService()
-        let prompt = "사진 속의 텍스트(메뉴판, 간판 등)를 우선적으로 읽어서 한국어로 번역 및 설명해줘."
+        let prompt = """
+내가 레이반 메타 안경으로 지금 보고 있는 장면이야.
+한국어로 자연스럽고 자세하게 설명해줘.
+불필요한 변명이나 "이미지가 잘 안보인다" 같은 말은 절대 하지 말고,
+바로 본론부터 설명해.
+"""
 
         do {
             let result = try await visionService.analyzeImage(resized, customPrompt: prompt)
@@ -95,6 +103,189 @@ class OpenClawChatViewModel: ObservableObject {
         }
 
         isProcessing = false
+    }
+
+    // MARK: - Chat View Entry Points
+
+    func captureAndDescribe() async {
+        await startVisualAISession()
+        if !lastAnalysisResult.isEmpty {
+            onDescribeResult?(lastAnalysisResult)
+        }
+    }
+
+    func captureAndTranslate() async {
+        guard !isProcessing else { return }
+        isProcessing = true
+        statusMessage = "번역 준비 중..."
+        lastAnalysisResult = ""
+
+        let t0 = CFAbsoluteTimeGetCurrent()
+        service.sendManualCaptureCommand()
+
+        guard let vm = streamViewModel else {
+            fail("StreamViewModel 미초기화", t0: t0)
+            return
+        }
+
+        if !vm.isStreaming {
+            statusMessage = "스트림 시작 중..."
+            await vm.handleStartStreaming()
+            let deadline = Date().addingTimeInterval(5.0)
+            while vm.currentVideoFrame == nil && Date() < deadline {
+                try? await Task.sleep(nanoseconds: 200_000_000)
+            }
+        }
+
+        guard let frame = vm.currentVideoFrame else {
+            fail("프레임 수신 실패", t0: t0)
+            return
+        }
+
+        statusMessage = "번역 중..."
+        let resized = Self.resizeForAnalysis(frame, maxDimension: 1024)
+        let visionService = QuickVisionService()
+        let prompt = """
+내가 레이반 메타 안경으로 지금 보고 있는 장면이야.
+사진 속 모든 텍스트를 찾아서 한국어로 번역해줘.
+번역할 텍스트가 없으면 장면에 보이는 문자나 기호를 읽어줘.
+불필요한 설명 없이 번역 결과만 바로 말해줘.
+"""
+
+        do {
+            let result = try await visionService.analyzeImage(resized, customPrompt: prompt)
+            lastAnalysisResult = result
+            statusMessage = "음성 출력 중..."
+            TTSService.shared.speak(result)
+            statusMessage = "완료"
+            onDescribeResult?(result)
+        } catch {
+            let msg = "번역 실패: \(error.localizedDescription)"
+            lastAnalysisResult = msg
+            statusMessage = msg
+            onDescribeResult?(msg)
+        }
+
+        isProcessing = false
+    }
+
+    // MARK: - Siri Custom Command
+
+    func processGeminiCommand(text: String) async {
+        guard !isProcessing else { return }
+        isProcessing = true
+        statusMessage = "명령 처리 중..."
+        lastAnalysisResult = ""
+
+        let t0 = CFAbsoluteTimeGetCurrent()
+
+        // Intent classification — no image needed for navigation
+        if let intent = await classifyIntent(text: text),
+           intent.type == "navigation",
+           let dest = intent.destination {
+            await GoogleMapsNavigator.shared.startVoiceNavigation(destination: dest)
+            lastAnalysisResult = "\(dest) 네비게이션 시작"
+            statusMessage = "네비게이션 시작"
+            isProcessing = false
+            return
+        }
+
+        guard let vm = streamViewModel else {
+            fail("StreamViewModel 미초기화", t0: t0)
+            return
+        }
+
+        if !vm.isStreaming {
+            statusMessage = "스트림 시작 중..."
+            await vm.handleStartStreaming()
+            let deadline = Date().addingTimeInterval(5.0)
+            while vm.currentVideoFrame == nil && Date() < deadline {
+                try? await Task.sleep(nanoseconds: 200_000_000)
+            }
+        }
+
+        guard let frame = vm.currentVideoFrame else {
+            fail("프레임 수신 실패", t0: t0)
+            return
+        }
+
+        statusMessage = "AI 분석 중..."
+        let resized = Self.resizeForAnalysis(frame, maxDimension: 1024)
+        let visionService = QuickVisionService()
+
+        do {
+            let result = try await visionService.analyzeImage(resized, customPrompt: text)
+            lastAnalysisResult = result
+            statusMessage = "음성 출력 중..."
+            TTSService.shared.speak(result)
+            statusMessage = "완료"
+            print("[CustomCmd] 완료: \(result.prefix(80))... (\(elapsed(t0)))")
+        } catch {
+            let msg = "AI 분석 실패: \(error.localizedDescription)"
+            lastAnalysisResult = msg
+            statusMessage = msg
+        }
+
+        isProcessing = false
+    }
+
+    /// 자연어 명령을 Gemini에게 그대로 전달 — navigation 감지 포함
+    func processNaturalCommand(text: String) async {
+        await processGeminiCommand(text: text)
+    }
+
+    // MARK: - Intent Classification
+
+    struct IntentResponse: Decodable {
+        let type: String
+        let destination: String?
+    }
+
+    /// Text-only Gemini call to classify the user's intent before grabbing a frame.
+    func classifyIntent(text: String) async -> IntentResponse? {
+        let systemPrompt = """
+사용자의 명령을 분석해서 JSON으로만 반환해:
+{
+  "type": "navigation" | "translation" | "telegram" | "analysis" | "chat",
+  "destination": "목적지 문자열"
+}
+사용자 명령: \(text)
+"""
+        guard let url = URL(string: "\(VisionAPIConfig.baseURL)/chat/completions") else { return nil }
+
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.timeoutInterval = 15
+        for (key, value) in VisionAPIConfig.headers(with: VisionAPIConfig.apiKey) {
+            urlRequest.setValue(value, forHTTPHeaderField: key)
+        }
+
+        let body: [String: Any] = [
+            "model": VisionAPIConfig.model,
+            "messages": [["role": "user", "content": systemPrompt]]
+        ]
+        guard let httpBody = try? JSONSerialization.data(withJSONObject: body) else { return nil }
+        urlRequest.httpBody = httpBody
+
+        guard let (data, _) = try? await URLSession.shared.data(for: urlRequest) else { return nil }
+
+        // Extract content string from choices[0].message.content
+        guard
+            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let choices = json["choices"] as? [[String: Any]],
+            let message = choices.first?["message"] as? [String: Any],
+            let content = message["content"] as? String
+        else { return nil }
+
+        // Strip possible markdown code fences before decoding
+        let cleaned = content
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard let intentData = cleaned.data(using: .utf8) else { return nil }
+        return try? JSONDecoder().decode(IntentResponse.self, from: intentData)
     }
 
     // MARK: - Helpers

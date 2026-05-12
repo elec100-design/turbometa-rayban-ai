@@ -8,7 +8,7 @@ import SwiftUI
 struct TurboMetaHomeView: View {
     @ObservedObject var streamViewModel: StreamSessionViewModel
     @ObservedObject var wearablesViewModel: WearablesViewModel
-    @StateObject private var quickVisionManager = QuickVisionManager.shared
+    @State private var quickVisionManager = QuickVisionManager.shared
     @StateObject private var liveAIManager = LiveAIManager.shared
     let apiKey: String
 
